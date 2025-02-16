@@ -55,7 +55,7 @@ with st.sidebar.expander("🔍 Filter Data"):
 filtered_df = df[(df["order_purchase_timestamp"] >= pd.to_datetime(date_range[0])) & 
                  (df["order_purchase_timestamp"] <= pd.to_datetime(date_range[1]))]
 filtered_df = filtered_df[filtered_df["product_category"].isin(product_category)]
-filtered_customer_df = customer_df[customer_df["segment"].isin(selected_segment)]
+filtered_customer_df = customer_df[customer_df["segment"].isin(selected_segments)]
 
 # Dynamic Key Metrics
 total_customers = filtered_df['customer_unique_id'].nunique()
