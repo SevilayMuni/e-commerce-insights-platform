@@ -17,15 +17,23 @@ def load_data():
 
 df, customer_df, clv_df = load_data()
 
+# Top Navigation Bar
+st.sidebar.title("Navigation")
+tab = st.sidebar.radio("Go to", ["Customer Insights", "Product Analysis", "Economic Trends"])
 
-# Sidebar Filters
-st.sidebar.header("🔍 Filter Data")
-selected_segment = st.sidebar.multiselect("Select Customer Segments", customer_df["segment"].unique(), customer_df["segment"].unique())
-date_range = st.sidebar.date_input("Select Date Range", [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
-product_category = st.sidebar.multiselect("Select Product Categories", df["product_category"].unique(), df["product_category"].unique())
-churn_threshold = st.sidebar.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
+# Default and Recommended Filters
+default_segments = ["Loyal Customers", "Potential Loyalists"]
+default_categories = ["electronics", "furniture_decor", "health_beauty"]
 
-# Filter Data
+# Collapsible Filters
+with st.sidebar.expander("🔍 Filter Data"):
+    selected_segment = st.multiselect("Select Customer Segments", customer_df["segment"].unique(), default=default_segments)
+    date_range = st.date_input("Select Date Range", [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
+    with st.expander("Select Product Categories"):
+        product_category = st.multiselect("Categories", df["product_category"].unique(), default=default_categories)
+    churn_threshold = st.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
+
+# Filter Data Dynamically
 filtered_df = df[(df["order_purchase_timestamp"] >= pd.to_datetime(date_range[0])) & 
                  (df["order_purchase_timestamp"] <= pd.to_datetime(date_range[1]))]
 filtered_df = filtered_df[filtered_df["product_category"].isin(product_category)]
@@ -37,55 +45,56 @@ total_revenue = filtered_df['payment_value'].sum()
 avg_order_value = filtered_df['payment_value'].mean()
 churn_rate = (filtered_df[filtered_df['recency'] > churn_threshold].shape[0] / total_customers) * 100
 
-# Dashboard Title
-st.title("📊 Advanced E-Commerce Analytics Dashboard")
+# Customer Insights Tab
+if tab == "Customer Insights":
+    st.title("👥 Customer Insights")
+    
+    # Key Metrics in Cards
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Customers", f"{total_customers:,}", help="Total unique customers in the selected segment and date range.")
+    col2.metric("Total Revenue", f"${total_revenue:,.2f}", help="Total revenue generated in the selected segment and date range.")
+    col3.metric("Average Order Value", f"${avg_order_value:,.2f}", help="Average value of orders in the selected segment and date range.")
+    col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
 
-# Key Metrics
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Customers", f"{total_customers:,}", help="Total unique customers in the selected segment and date range.")
-col2.metric("Total Revenue", f"${total_revenue:,.2f}", help="Total revenue generated in the selected segment and date range.")
-col3.metric("Average Order Value", f"${avg_order_value:,.2f}", help="Average value of orders in the selected segment and date range.")
-col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
+    # RFM Analysis
+    st.subheader("📌 Customer Segmentation (RFM)")
+    fig1 = px.scatter(
+        filtered_customer_df, x="frequency", y="total_spending", color="segment",
+        title="Customer Segments Based on Frequency & Spending",
+        labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
+        size_max=10,
+        hover_data=["customer_unique_id"]
+    )
+    st.plotly_chart(fig1)
 
-# Customer Segmentation (RFM)
-st.subheader("📌 Customer Segmentation (RFM)")
-fig1 = px.scatter(
-    filtered_customer_df, x="frequency", y="total_spending", color="segment",
-    title="Customer Segments Based on Frequency & Spending",
-    labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
-    size_max=10,
-    hover_data=["customer_unique_id"]
-)
-st.plotly_chart(fig1)
+    # Churn Risk Analysis
+    st.subheader("⚠️ Churn Risk Analysis")
+    filtered_df["churn_risk"] = filtered_df["recency"].apply(lambda x: "High Risk" if x > churn_threshold else "Low Risk")
+    fig2 = px.pie(filtered_df, names="churn_risk", title="Churn Risk Distribution")
+    st.plotly_chart(fig2)
 
-# Advanced Visualizations
-st.subheader("🌐 Advanced Visualizations")
-st.markdown("### Heatmap: Customer Activity Over Time")
-heatmap_data = filtered_df.groupby([filtered_df['order_purchase_timestamp'].dt.date, 'product_category']).size().unstack()
-fig2 = px.imshow(heatmap_data, labels=dict(x="Product Category", y="Date", color="Activity"), title="Customer Activity Heatmap")
-st.plotly_chart(fig2)
+# Product Analysis Tab
+elif tab == "Product Analysis":
+    st.title("📦 Product Analysis")
+    
+    # Key Metrics in Cards
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Products Sold", f"{filtered_df.shape[0]:,}", help="Total products sold in the selected categories and date range.")
+    col2.metric("Total Revenue", f"${total_revenue:,.2f}", help="Total revenue generated from the selected categories.")
+    col3.metric("Top Category", filtered_df['product_category'].mode()[0], help="Most popular product category.")
 
-st.markdown("### Treemap: Revenue by Product Category")
-treemap_data = filtered_df.groupby('product_category')['payment_value'].sum().reset_index()
-fig3 = px.treemap(treemap_data, path=['product_category'], values='payment_value', title="Revenue by Product Category")
-st.plotly_chart(fig3)
+    # Heatmap: Customer Activity Over Time
+    st.subheader("🌐 Customer Activity Heatmap")
+    heatmap_data = filtered_df.groupby([filtered_df['order_purchase_timestamp'].dt.date, 'product_category']).size().unstack()
+    fig3 = px.imshow(heatmap_data, labels=dict(x="Product Category", y="Date", color="Activity"), title="Customer Activity Heatmap")
+    st.plotly_chart(fig3)
 
-# Customizable Dashboard
-st.subheader("🛠️ Customize Your Dashboard")
-selected_metrics = st.multiselect("Select Metrics to Display", ["Total Customers", "Total Revenue", "Average Order Value", "Churn Rate"])
-selected_visualizations = st.multiselect("Select Visualizations to Display", ["RFM Scatter Plot", "Activity Heatmap", "Revenue Treemap", "Economic Trends"])
+    # Treemap: Revenue by Product Category
+    st.subheader("💰 Revenue by Product Category")
+    treemap_data = filtered_df.groupby('product_category')['payment_value'].sum().reset_index()
+    fig4 = px.treemap(treemap_data, path=['product_category'], values='payment_value', title="Revenue by Product Category")
+    st.plotly_chart(fig4)
 
-# Actionable Insights
-st.subheader("📢 Actionable Insights")
-for segment in selected_segment:
-    st.markdown(f"### 🏷️ Segment: {segment}")
-    if segment == "Lost Customers":
-        st.write("🛑 **Insight:** These customers haven't made a purchase in a while. Offer aggressive re-engagement campaigns and discounts.")
-    elif segment == "Potential Loyalists":
-        st.write("🎁 **Insight:** These customers show potential for loyalty. Encourage repeat purchases with personalized promotions.")
-    elif segment == "Loyal Customers":
-        st.write("💎 **Insight:** These are your most valuable customers. Provide VIP perks and referral programs to retain them.")
-    else:
-        st.write("📈 **Insight:** Focus on optimizing the new customer experience and conversion rates.")
-
-st.success("🎯 This dashboard provides deep insights for data-driven marketing decisions!")
+# Economic Trends Tab
+elif tab == "Economic Trends":
+    st.title("📈 Economic Trends")
