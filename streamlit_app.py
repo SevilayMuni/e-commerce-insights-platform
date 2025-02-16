@@ -46,7 +46,7 @@ with st.sidebar.expander("🔍 Filter Data"):
     # Product Categories
     product_category = st.multiselect(
         "Select Product Categories", 
-        df["product_category_name"].unique(), 
+        df["product_category"].unique(), 
         default=["electronics", "furniture_decor", "health_beauty"]
     )
     
