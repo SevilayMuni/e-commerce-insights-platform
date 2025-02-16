@@ -46,7 +46,7 @@ with st.sidebar.expander("🔍 Filter Data"):
     # Product Categories
     product_category = st.multiselect(
         "Select Product Categories", 
-        df["product_category"].unique())
+        df["product_category"].unique(), default=["electronics", "furniture_decor", "health_beauty"])
     
     # Churn Threshold Slider
     churn_threshold = st.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
