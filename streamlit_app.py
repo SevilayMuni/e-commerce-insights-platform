@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import requests
+import datetime
+
+# FRED API Key
+FRED_API_KEY = "fe01e8ff873c535a4652b9f1bc78b788"
 
 # Load Data
 @st.cache_data
@@ -30,11 +35,12 @@ with st.sidebar.expander("🔍 Filter Data"):
     # Clean segment names (remove any unintended characters like "x")
     cleaned_segment_options = [seg.strip().replace(" x", "") for seg in segment_options]
     
-    # Checkbox-based segment selection
+    # Checkbox-based segment selection with default selections
     st.write("Select Customer Segments:")
     selected_segments = []  # Use 'selected_segments' to store selected segments
+    default_segments = ["promising customer", "at risk customer"]  # Default segments
     for segment in cleaned_segment_options:
-        if st.checkbox(segment, value=(segment in ["promising customer", "at risk customer"])):
+        if st.checkbox(segment, value=(segment in default_segments)):
             selected_segments.append(segment)
     
     # Date Range Picker
@@ -114,5 +120,82 @@ elif tab == "Product Analysis":
     st.plotly_chart(fig4)
 
 # Economic Trends Tab
-elif tab == "Economic Trends":
+if tab == "Economic Trends":
     st.title("📈 Economic Trends")
+    
+    # Key Metrics in Cards for Economic Trends
+    st.subheader("Key Economic Metrics")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Inflation (CPI)", "2.5%", help="Latest Consumer Price Index (CPI) data.")
+    col2.metric("Interest Rates", "4.25%", help="Federal Funds Rate.")
+    col3.metric("Unemployment Rate", "3.8%", help="Latest unemployment rate.")
+    col4.metric("Retail Sales Growth", "1.2%", help="Monthly retail sales growth.")
+
+    # Metric Selectbox
+    st.subheader("Select Economic Metric")
+    metric_options = ["Inflation (CPI)", "Interest Rates (Federal Funds Rate)", "Unemployment Rate", "Retail Sales"]
+    selected_metric = st.selectbox("Choose a metric", metric_options, index=3)  # Default to Retail Sales
+
+    # Time Period Checkboxes
+    st.subheader("Select Time Period")
+    weekly = st.checkbox("Weekly", value=True)
+    monthly = st.checkbox("Monthly", value=True)
+    yearly = st.checkbox("Yearly", value=True)
+
+    # Fetch FRED Data
+    def fetch_fred_data(series_id, start_date, end_date):
+        url = f"https://api.stlouisfed.org/fred/series/observations"
+        params = {
+            "series_id": series_id,
+            "api_key": FRED_API_KEY,
+            "file_type": "json",
+            "observation_start": start_date,
+            "observation_end": end_date
+        }
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            df = pd.DataFrame(data["observations"])
+            df["date"] = pd.to_datetime(df["date"])
+            df["value"] = pd.to_numeric(df["value"], errors="coerce")
+            return df
+        else:
+            st.error("Failed to fetch data from FRED API.")
+            return pd.DataFrame()
+
+    # Define FRED Series IDs
+    fred_series = {
+        "Inflation (CPI)": "CPIAUCSL",
+        "Interest Rates (Federal Funds Rate)": "FEDFUNDS",
+        "Unemployment Rate": "UNRATE",
+        "Retail Sales": "RSXFS"
+    }
+
+    # Date Range for FRED Data
+    end_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    start_date = (datetime.datetime.now() - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
+
+    # Fetch and Display Economic Data
+    series_id = fred_series[selected_metric]
+    fred_df = fetch_fred_data(series_id, start_date, end_date)
+    if not fred_df.empty:
+        st.subheader(f"{selected_metric} Over Time")
+        fig = px.line(fred_df, x="date", y="value", title=f"{selected_metric} Over Time")
+        st.plotly_chart(fig)
+
+        # Weekly, Monthly, Yearly Aggregations
+        fred_df.set_index("date", inplace=True)
+        if weekly:
+            weekly_df = fred_df.resample("W").mean()
+            st.write(f"**Weekly {selected_metric}:**")
+            st.line_chart(weekly_df)
+        if monthly:
+            monthly_df = fred_df.resample("M").mean()
+            st.write(f"**Monthly {selected_metric}:**")
+            st.line_chart(monthly_df)
+        if yearly:
+            yearly_df = fred_df.resample("Y").mean()
+            st.write(f"**Yearly {selected_metric}:**")
+            st.line_chart(yearly_df)
+    else:
+        st.warning(f"No data available for {selected_metric}.")
