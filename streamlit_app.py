@@ -81,7 +81,7 @@ if tab == "Customer Insights":
         title="Customer Segments Based on Frequency & Spending",
         labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
         size_max=10,
-        hover_data=["customer_unique_id"]
+        hover_data=["customer_id"]
     )
     st.plotly_chart(fig1)
 
