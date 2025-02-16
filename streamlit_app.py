@@ -21,43 +21,34 @@ df, customer_df, clv_df = load_data()
 st.sidebar.title("Navigation")
 tab = st.sidebar.radio("Go to", ["Customer Insights", "Product Analysis", "Economic Trends"])
 
-# Default and Recommended Filters
-default_segments = ["Loyal Customers", "Potential Loyalists"]
-default_categories = ["electronics", "furniture_decor", "health_beauty"]
 
 # Collapsible Filters
 with st.sidebar.expander("🔍 Filter Data"):
-    # Group Customer Segments Logically
+    # Ensure segment names are uniform and match the dataset
     segment_options = customer_df["segment"].unique()
-    segment_groups = {
-        "High Value": ["Loyal Customers", "Potential Loyalists"],
-        "At Risk": ["At Risk Customers", "Hibernating Customers"],
-        "Inactive": ["Lost Customers"]
-    }
     
-    # Flatten the grouped segments into a single list
-    grouped_segments = [seg for group in segment_groups.values() for seg in group]
+    # Clean segment names (remove any unintended characters like "x")
+    cleaned_segment_options = [seg.strip().replace(" x", "") for seg in segment_options]
     
-    # Ensure default segments exist in the options
-    default_segments = ["Loyal Customers", "Potential Loyalists"]
-    valid_default_segments = [seg for seg in default_segments if seg in segment_options]
-    
-    # Use valid_default_segments as the default
-    selected_segment = st.multiselect(
-        "Select Customer Segments", 
-        grouped_segments, 
-        default=valid_default_segments if valid_default_segments else grouped_segments[:2])
+    # Checkbox-based segment selection
+    st.write("Select Customer Segments:")
+    selected_segments = []
+    for segment in cleaned_segment_options:
+        if st.checkbox(segment, value=(segment in ["promising customer", "at risk customer"])):
+            selected_segments.append(segment)
     
     # Date Range Picker
     date_range = st.date_input(
         "Select Date Range", 
-        [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
+        [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()]
+    )
     
-    # Product Categories (without nested expanders)
+    # Product Categories
     product_category = st.multiselect(
         "Select Product Categories", 
         df["product_category_name"].unique(), 
-        default=["electronics", "furniture_decor", "health_beauty"])
+        default=["electronics", "furniture_decor", "health_beauty"]
+    )
     
     # Churn Threshold Slider
     churn_threshold = st.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
