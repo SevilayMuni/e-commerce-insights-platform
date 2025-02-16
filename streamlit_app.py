@@ -38,17 +38,15 @@ with st.sidebar.expander("🔍 Filter Data"):
     selected_segment = st.multiselect(
         "Select Customer Segments", 
         segment_options, 
-        default=valid_default_segments if valid_default_segments else segment_options[:2]  # Fallback to first two options if no valid defaults
-    )
+        default=valid_default_segments if valid_default_segments else segment_options[:2])
     
-    date_range = st.date_input("Select Date Range", [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max())
+    date_range = st.date_input("Select Date Range", [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
     
     with st.expander("Select Product Categories"):
         product_category = st.multiselect(
             "Categories", 
             df["product_category_name"].unique(), 
-            default=["electronics", "furniture_decor", "health_beauty"]  # Ensure these are valid options
-        )
+            default=["electronics", "furniture_decor", "health_beauty"])
     
     churn_threshold = st.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
 
