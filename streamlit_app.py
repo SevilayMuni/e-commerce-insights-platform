@@ -5,7 +5,6 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
 # Load Data
-@st.cache_data
 df = pd.read_parquet('./data/e-commerce-dataset.parquet', engine='pyarrow')
 customer_df = pd.read_csv('./data/customer-segmentation.csv')
 clv_df = pd.read_csv('./data/customer-lifetime-value.csv')
