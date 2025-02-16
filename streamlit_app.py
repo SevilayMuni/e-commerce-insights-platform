@@ -27,27 +27,39 @@ default_categories = ["electronics", "furniture_decor", "health_beauty"]
 
 # Collapsible Filters
 with st.sidebar.expander("🔍 Filter Data"):
-    # Ensure default segments exist in the options
+    # Group Customer Segments Logically
     segment_options = customer_df["segment"].unique()
-    default_segments = ["Loyal Customers", "Potential Loyalists"]
+    segment_groups = {
+        "High Value": ["Loyal Customers", "Potential Loyalists"],
+        "At Risk": ["At Risk Customers", "Hibernating Customers"],
+        "Inactive": ["Lost Customers"]
+    }
     
-    # Filter default_segments to only include valid options
+    # Flatten the grouped segments into a single list
+    grouped_segments = [seg for group in segment_groups.values() for seg in group]
+    
+    # Ensure default segments exist in the options
+    default_segments = ["Loyal Customers", "Potential Loyalists"]
     valid_default_segments = [seg for seg in default_segments if seg in segment_options]
     
     # Use valid_default_segments as the default
     selected_segment = st.multiselect(
         "Select Customer Segments", 
-        segment_options, 
-        default=valid_default_segments if valid_default_segments else segment_options[:2])
+        grouped_segments, 
+        default=valid_default_segments if valid_default_segments else grouped_segments[:2])
     
-    date_range = st.date_input("Select Date Range", [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
+    # Date Range Picker
+    date_range = st.date_input(
+        "Select Date Range", 
+        [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
     
-    with st.expander("Select Product Categories"):
-        product_category = st.multiselect(
-            "Categories", 
-            df["product_category_name"].unique(), 
-            default=["electronics", "furniture_decor", "health_beauty"])
+    # Product Categories (without nested expanders)
+    product_category = st.multiselect(
+        "Select Product Categories", 
+        df["product_category_name"].unique(), 
+        default=["electronics", "furniture_decor", "health_beauty"])
     
+    # Churn Threshold Slider
     churn_threshold = st.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
 
 # Filter Data Dynamically
