@@ -7,12 +7,16 @@ import plotly.graph_objects as go
 @st.cache_data
 def load_data():
     df = pd.read_parquet('./data/e-commerce-dataset.parquet', engine='pyarrow')
+    df["order_purchase_timestamp"] = pd.to_datetime(df["order_purchase_timestamp"])
+    max_purchase_date = df['order_purchase_timestamp'].max()
+    last_purchase_date = df.groupby('customer_unique_id')['order_purchase_timestamp'].max().reset_index()
+    df['recency'] = (max_purchase_date - last_purchase_date['order_purchase_timestamp']).dt.days
     customer_df = pd.read_csv('./data/customer-segmentation.csv')
     clv_df = pd.read_csv('./data/customer-lifetime-value.csv')
-    df["order_purchase_timestamp"] = pd.to_datetime(df["order_purchase_timestamp"])
     return df, customer_df, clv_df
 
 df, customer_df, clv_df = load_data()
+
 
 # Sidebar Filters
 st.sidebar.header("🔍 Filter Data")
