@@ -32,7 +32,7 @@ with st.sidebar.expander("🔍 Filter Data"):
     
     # Checkbox-based segment selection
     st.write("Select Customer Segments:")
-    selected_segments = []
+    selected_segments = []  # Use 'selected_segments' to store selected segments
     for segment in cleaned_segment_options:
         if st.checkbox(segment, value=(segment in ["promising customer", "at risk customer"])):
             selected_segments.append(segment)
@@ -46,9 +46,7 @@ with st.sidebar.expander("🔍 Filter Data"):
     # Product Categories
     product_category = st.multiselect(
         "Select Product Categories", 
-        df["product_category"].unique(), 
-        default=["electronics", "furniture_decor", "health_beauty"]
-    )
+        df["product_category"].unique())
     
     # Churn Threshold Slider
     churn_threshold = st.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
