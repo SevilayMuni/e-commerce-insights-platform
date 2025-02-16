@@ -27,10 +27,29 @@ default_categories = ["electronics", "furniture_decor", "health_beauty"]
 
 # Collapsible Filters
 with st.sidebar.expander("🔍 Filter Data"):
-    selected_segment = st.multiselect("Select Customer Segments", customer_df["segment"].unique(), default=default_segments)
-    date_range = st.date_input("Select Date Range", [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
+    # Ensure default segments exist in the options
+    segment_options = customer_df["segment"].unique()
+    default_segments = ["Loyal Customers", "Potential Loyalists"]
+    
+    # Filter default_segments to only include valid options
+    valid_default_segments = [seg for seg in default_segments if seg in segment_options]
+    
+    # Use valid_default_segments as the default
+    selected_segment = st.multiselect(
+        "Select Customer Segments", 
+        segment_options, 
+        default=valid_default_segments if valid_default_segments else segment_options[:2]  # Fallback to first two options if no valid defaults
+    )
+    
+    date_range = st.date_input("Select Date Range", [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max())
+    
     with st.expander("Select Product Categories"):
-        product_category = st.multiselect("Categories", df["product_category"].unique(), default=default_categories)
+        product_category = st.multiselect(
+            "Categories", 
+            df["product_category_name"].unique(), 
+            default=["electronics", "furniture_decor", "health_beauty"]  # Ensure these are valid options
+        )
+    
     churn_threshold = st.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
 
 # Filter Data Dynamically
