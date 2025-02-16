@@ -18,13 +18,13 @@ df, customer_df, clv_df = load_data()
 st.sidebar.header("🔍 Filter Data")
 selected_segment = st.sidebar.multiselect("Select Customer Segments", customer_df["segment"].unique(), customer_df["segment"].unique())
 date_range = st.sidebar.date_input("Select Date Range", [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
-product_category = st.sidebar.multiselect("Select Product Categories", df["product_category_name"].unique(), df["product_category_name"].unique())
+product_category = st.sidebar.multiselect("Select Product Categories", df["product_category"].unique(), df["product_category"].unique())
 churn_threshold = st.sidebar.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
 
 # Filter Data
 filtered_df = df[(df["order_purchase_timestamp"] >= pd.to_datetime(date_range[0])) & 
                  (df["order_purchase_timestamp"] <= pd.to_datetime(date_range[1]))]
-filtered_df = filtered_df[filtered_df["product_category_name"].isin(product_category)]
+filtered_df = filtered_df[filtered_df["product_category"].isin(product_category)]
 filtered_customer_df = customer_df[customer_df["segment"].isin(selected_segment)]
 
 # Dynamic Key Metrics
@@ -57,13 +57,13 @@ st.plotly_chart(fig1)
 # Advanced Visualizations
 st.subheader("🌐 Advanced Visualizations")
 st.markdown("### Heatmap: Customer Activity Over Time")
-heatmap_data = filtered_df.groupby([filtered_df['order_purchase_timestamp'].dt.date, 'product_category_name']).size().unstack()
+heatmap_data = filtered_df.groupby([filtered_df['order_purchase_timestamp'].dt.date, 'product_category']).size().unstack()
 fig2 = px.imshow(heatmap_data, labels=dict(x="Product Category", y="Date", color="Activity"), title="Customer Activity Heatmap")
 st.plotly_chart(fig2)
 
 st.markdown("### Treemap: Revenue by Product Category")
-treemap_data = filtered_df.groupby('product_category_name')['payment_value'].sum().reset_index()
-fig3 = px.treemap(treemap_data, path=['product_category_name'], values='payment_value', title="Revenue by Product Category")
+treemap_data = filtered_df.groupby('product_category')['payment_value'].sum().reset_index()
+fig3 = px.treemap(treemap_data, path=['product_category'], values='payment_value', title="Revenue by Product Category")
 st.plotly_chart(fig3)
 
 # Customizable Dashboard
