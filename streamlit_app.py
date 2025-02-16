@@ -136,11 +136,13 @@ if tab == "Economic Trends":
     metric_options = ["Inflation (CPI)", "Interest Rates (Federal Funds Rate)", "Unemployment Rate", "Retail Sales"]
     selected_metric = st.selectbox("Choose a metric", metric_options, index=3)  # Default to Retail Sales
 
-    # Time Period Checkboxes
+    # Time Period Select Slider
     st.subheader("Select Time Period")
-    weekly = st.checkbox("Weekly", value=True)
-    monthly = st.checkbox("Monthly", value=True)
-    yearly = st.checkbox("Yearly", value=True)
+    time_period = st.select_slider(
+        "Choose a time period",
+        options=["Weekly", "Monthly", "Yearly"],
+        value="Monthly"  # Default to Monthly
+    )
 
     # Fetch FRED Data
     def fetch_fred_data(series_id, start_date, end_date):
@@ -157,7 +159,7 @@ if tab == "Economic Trends":
             data = response.json()
             df = pd.DataFrame(data["observations"])
             df["date"] = pd.to_datetime(df["date"])
-            df["value"] = pd.to_numeric(df["value"], errors="coerce")
+            df["value"] = pd.to_numeric(df["value"], errors="coerce")  # Ensure 'value' is numeric
             return df
         else:
             st.error("Failed to fetch data from FRED API.")
@@ -183,19 +185,19 @@ if tab == "Economic Trends":
         fig = px.line(fred_df, x="date", y="value", title=f"{selected_metric} Over Time")
         st.plotly_chart(fig)
 
-        # Weekly, Monthly, Yearly Aggregations
+        # Resample data based on selected time period
         fred_df.set_index("date", inplace=True)
-        if weekly:
-            weekly_df = fred_df.resample("W").mean()
-            st.write(f"**Weekly {selected_metric}:**")
-            st.line_chart(weekly_df)
-        if monthly:
-            monthly_df = fred_df.resample("M").mean()
-            st.write(f"**Monthly {selected_metric}:**")
-            st.line_chart(monthly_df)
-        if yearly:
-            yearly_df = fred_df.resample("Y").mean()
-            st.write(f"**Yearly {selected_metric}:**")
-            st.line_chart(yearly_df)
+        if time_period == "Weekly":
+            resampled_df = fred_df.resample("W").mean()
+        elif time_period == "Monthly":
+            resampled_df = fred_df.resample("M").mean()
+        elif time_period == "Yearly":
+            resampled_df = fred_df.resample("Y").mean()
+
+        # Display resampled data
+        st.write(f"**{time_period} {selected_metric}:**")
+        st.line_chart(resampled_df)
     else:
         st.warning(f"No data available for {selected_metric}.")
+
+   
