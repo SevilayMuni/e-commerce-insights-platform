@@ -238,7 +238,6 @@ if tab == "Economic Trends":
 
         # Update layout for dual-axis
         fig.update_layout(
-            title=f"{selected_metric} vs Retail Sales Over Time",
             xaxis_title="Date",
             yaxis_title=selected_metric,
             yaxis2=dict(title="Retail Sales", overlaying="y", side="right"),
