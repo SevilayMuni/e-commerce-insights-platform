@@ -175,18 +175,16 @@ if tab == "Economic Trends":
     col4.metric("Retail Sales Growth", "1.2%", help="Monthly retail sales growth.")
 
     # Metric Selectbox
-    st.subheader("Select Economic Metric")
+    st.subheader("Select Parameters for Plot")
     metric_options = ["Inflation (CPI)", "Interest Rates (Federal Funds Rate)", "Unemployment Rate"]
-    selected_metric = st.selectbox(metric_options, index=0)  # Default to Retail Sales
+    selected_metric = st.selectbox("Choose Economic Metric", metric_options, index=0)  # Default to Retail Sales
 
     # Date Range Selection
-    st.subheader("Select Date Range")
-    start_date = st.date_input("Start Date", datetime.date(2020, 1, 1))
-    end_date = st.date_input("End Date", datetime.date(2023, 12, 31))
+    start_date = st.date_input("Plot Start Date", datetime.date(2020, 1, 1))
+    end_date = st.date_input("Plot End Date", datetime.date(2023, 12, 31))
 
     # Time Granularity Selection
-    st.subheader("Select Time Granularity")
-    time_granularity = st.radio("Choose a time period", ["Weekly", "Monthly", "Yearly"], index=1, horizontal=True)
+    time_granularity = st.radio("Choose Time Period", ["Weekly", "Monthly", "Yearly"], index=1, horizontal=True)
 
     # Fetch Data for Selected Metric and Retail Sales
     fred_series = {
