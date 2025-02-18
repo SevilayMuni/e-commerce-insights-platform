@@ -206,9 +206,9 @@ if tab == "Economic Trends":
         # Resample data based on selected time period
         fred_df.set_index("date", inplace=True)
         if time_granularity == "Monthly":
-            resampled_df = fred_df.resample("M").mean()
+            resampled_df = fred_df.resample("M").mean(numeric_only=True)
         elif time_granularity == "Yearly":
-            resampled_df = fred_df.resample("Y").mean()
+            resampled_df = fred_df.resample("Y").mean(numeric_only=True)
 
         # Display resampled data
         st.write(f"**{time_granularity} {selected_metric}:**")
