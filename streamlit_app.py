@@ -17,6 +17,7 @@ def load_data():
     last_purchase_date = df.groupby('customer_unique_id')['order_purchase_timestamp'].max().reset_index()
     df['recency'] = (max_purchase_date - last_purchase_date['order_purchase_timestamp']).dt.days
     df['product_category'] = df['product_category'].str.replace("_", " ").str.title()
+    geo_df = pd.read_parquet('./data/geo_df.parquet', engine='pyarrow')
     customer_df = pd.read_csv('./data/customer-segmentation.csv')
     clv_df = pd.read_csv('./data/customer-lifetime-value.csv')
     return df, customer_df, clv_df
@@ -106,12 +107,16 @@ if tab == "Customer Insights":
     fig2 = px.pie(filtered_df, names="churn_risk", title="Churn Risk Distribution")
     st.plotly_chart(fig2)
     
-    # Customer Distribution Map
-    st.subheader("🌍 Customer Distribution by Region")
-    if "customer_state" in df.columns:
-        map_data = df.groupby("customer_state")["payment_value"].sum().reset_index()
-        fig_map = px.choropleth(map_data, locations="customer_state", locationmode="Brazil-states", 
-                                color="payment_value", title="Sales by Region")
+    # Customer Distribution Map by City
+    st.subheader("🌍 Customer Distribution by City")
+    if "geolocation_lat" in geo_df.columns and "geolocation_lng" in geo_df.columns:
+        city_revenue = df.groupby("customer_city")["payment_value"].sum().reset_index()
+        geo_merged = geo_df.merge(city_revenue, left_on="geolocation_city", right_on="customer_city", how="left")
+        fig_map = px.scatter_mapbox(geo_merged, lat="geolocation_lat", lon="geolocation_lng", 
+                                    size="payment_value", hover_name="customer_city",
+                                    hover_data={"payment_value": True}, zoom=4,
+                                    title="Customer Revenue by City")
+        fig_map.update_layout(mapbox_style="open-street-map")
         st.plotly_chart(fig_map)
 
 # Product Analysis Tab
