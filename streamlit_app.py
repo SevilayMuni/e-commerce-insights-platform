@@ -110,9 +110,8 @@ if tab == "Customer Insights":
     # Customer Distribution Map by City
     st.subheader("🌍 Customer Distribution by City")
     if "geolocation_lat" in geo_df.columns and "geolocation_lng" in geo_df.columns:
-        city_revenue = df.groupby("customer_city")["payment_value"].sum().reset_index()
-        geo_merged = geo_df.merge(city_revenue, left_on="geolocation_city", right_on="customer_city", how="left")
-        fig_map = px.scatter_mapbox(geo_merged, lat="geolocation_lat", lon="geolocation_lng", 
+        geo_df["city_revenue"] = geo_df.groupby("customer_city")["payment_value"].sum()
+        fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
                                     size="payment_value", hover_name="customer_city",
                                     hover_data={"payment_value": True}, zoom=4,
                                     title="Customer Revenue by City")
