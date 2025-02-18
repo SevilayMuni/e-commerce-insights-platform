@@ -177,7 +177,7 @@ if tab == "Economic Trends":
     # Metric Selectbox
     st.subheader("Select Economic Metric")
     metric_options = ["Inflation (CPI)", "Interest Rates (Federal Funds Rate)", "Unemployment Rate"]
-    selected_metric = st.selectbox("Choose a metric", metric_options, index=0)  # Default to Retail Sales
+    selected_metric = st.selectbox(metric_options, index=0)  # Default to Retail Sales
 
     # Date Range Selection
     st.subheader("Select Date Range")
