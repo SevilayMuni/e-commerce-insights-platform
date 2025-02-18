@@ -77,7 +77,7 @@ if tab == "Customer Insights":
     # Key Metrics in Cards
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Customers", f"{total_customers:,}", help="Total unique customers in the selected segment and date range.")
-    col2.metric("Total Revenue", f"${formatted_revenue:,.2f}", help="Total revenue generated in the selected segment and date range.")
+    col2.metric("Total Revenue $", formatted_revenue, help="Total revenue generated in the selected segment and date range.")
     col3.metric("Average Order Value", f"${avg_order_value:,.2f}", help="Average value of orders in the selected segment and date range.")
     col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
 
