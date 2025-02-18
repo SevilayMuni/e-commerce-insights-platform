@@ -105,7 +105,7 @@ elif tab == "Product Analysis":
     # Key Metrics in Cards
     col1, col2, col3 = st.columns(3)
     col1.metric("Total Products Sold", f"{filtered_df.shape[0]:,}", help="Total products sold in the selected categories and date range.")
-    col2.metric("Total Revenue", f"${total_revenue:,.2f}", help="Total revenue generated from the selected categories.")
+    col2.metric("Total Revenue $", formatted_revenue, help="Total revenue generated from the selected categories.")
     col3.metric("Top Category", filtered_df['product_category'].mode()[0], help="Most popular product category.")
 
     # Heatmap: Customer Activity Over Time
@@ -139,14 +139,8 @@ if tab == "Economic Trends":
     # Year Selection
     year_selected = st.slider("Select Year", min_value=2010, max_value=2025, value=2024)
     # Time Granularity Selection
-    time_granularity = st.radio("Select Time Granularity", ["Monthly", "Yearly"], horizontal=True)
-    # Time Period Select Slider
-    st.subheader("Select Time Period")
-    time_period = st.select_slider(
-        "Choose a time period",
-        options=["Monthly", "Yearly"],
-        value="Monthly"  # Default to Monthly
-    )
+    time_granularity = st.radio("Select Time Period", ["Monthly", "Yearly"], horizontal=True)
+   
 
     # Fetch FRED Data
     def fetch_fred_data(series_id, start_date, end_date):
