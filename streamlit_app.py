@@ -42,7 +42,7 @@ with st.sidebar.expander("🔍 Filter Data"):
     for segment in cleaned_segment_options:
         if st.checkbox(segment, value=(segment in default_segments)):
             selected_segments.append(segment)
-    
+  
     # Date Range Picker
     date_range = st.date_input(
         "Select Date Range", 
@@ -91,12 +91,21 @@ if tab == "Customer Insights":
         hover_data=["customer_id"]
     )
     st.plotly_chart(fig1)
-
+    # CLV Graph
+    if tab == "Customer Insights":
+        st.subheader("📊 Customer Lifetime Value (CLV)")
+        clv_df["quarter"] = clv_df["quarter"].astype(str)  # Convert quarter to string for proper axis formatting
+        fig_clv = px.line(clv_df, x="quarter", y=["clv", "weighted_clv"], 
+                          title="Customer Lifetime Value (CLV) Over Time",
+                          labels={"quarter": "Quarter", "value": "CLV"},
+                          color_discrete_map={"clv": "teal", "weighted_clv": "orange"})
+        st.plotly_chart(fig_clv)
     # Churn Risk Analysis
     st.subheader("⚠️ Churn Risk Analysis")
     filtered_df["churn_risk"] = filtered_df["recency"].apply(lambda x: "High Risk" if x > churn_threshold else "Low Risk")
     fig2 = px.pie(filtered_df, names="churn_risk", title="Churn Risk Distribution")
     st.plotly_chart(fig2)
+    
 
 # Product Analysis Tab
 elif tab == "Product Analysis":
@@ -140,7 +149,6 @@ if tab == "Economic Trends":
     year_selected = st.slider("Select Year", min_value=2010, max_value=2025, value=2024)
     # Time Granularity Selection
     time_granularity = st.radio("Select Time Period", ["Monthly", "Yearly"], horizontal=True)
-   
 
     # Fetch FRED Data
     def fetch_fred_data(series_id, start_date, end_date):
@@ -172,8 +180,8 @@ if tab == "Economic Trends":
     }
 
     # Date Range for FRED Data
-    end_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    start_date = (datetime.datetime.now() - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
+    start_date = f"{year_selected}-01-01"
+    end_date = f"{year_selected}-12-31"
 
     # Fetch and Display Economic Data
     series_id = fred_series[selected_metric]
@@ -185,17 +193,15 @@ if tab == "Economic Trends":
 
         # Resample data based on selected time period
         fred_df.set_index("date", inplace=True)
-        if time_period == "Weekly":
-            resampled_df = fred_df.resample("W").mean()
-        elif time_period == "Monthly":
+        if time_granularity == "Monthly":
             resampled_df = fred_df.resample("M").mean()
-        elif time_period == "Yearly":
+        elif time_granularity == "Yearly":
             resampled_df = fred_df.resample("Y").mean()
 
         # Display resampled data
-        st.write(f"**{time_period} {selected_metric}:**")
+        st.write(f"**{time_granularity} {selected_metric}:**")
         st.line_chart(resampled_df)
     else:
         st.warning(f"No data available for {selected_metric}.")
 
-   
+    
