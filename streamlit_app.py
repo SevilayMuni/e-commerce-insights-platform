@@ -16,6 +16,7 @@ def load_data():
     max_purchase_date = df['order_purchase_timestamp'].max()
     last_purchase_date = df.groupby('customer_unique_id')['order_purchase_timestamp'].max().reset_index()
     df['recency'] = (max_purchase_date - last_purchase_date['order_purchase_timestamp']).dt.days
+    df['product_category'] = df['product_category'].str.replace("_", " ").str.title()
     customer_df = pd.read_csv('./data/customer-segmentation.csv')
     clv_df = pd.read_csv('./data/customer-lifetime-value.csv')
     return df, customer_df, clv_df
@@ -96,7 +97,7 @@ if tab == "Customer Insights":
         clv_df["quarter"] = clv_df["quarter"].astype(str)  # Convert quarter to string for proper axis formatting
         fig_clv = px.line(clv_df, x="quarter", y=["clv", "weighted_clv"], 
                           title="Customer Lifetime Value (CLV) Over Time",
-                          labels={"quarter": "Quarter", "value": "CLV"},
+                          labels={"quarter": "Quarter", "value": "CLV", "variable": "Variable", "clv": "CLV", "weighted_clv": "Weighted CLV"},
                           color_discrete_map={"clv": "teal", "weighted_clv": "firebrick"})
         st.plotly_chart(fig_clv)
     # Churn Risk Analysis
@@ -105,6 +106,13 @@ if tab == "Customer Insights":
     fig2 = px.pie(filtered_df, names="churn_risk", title="Churn Risk Distribution")
     st.plotly_chart(fig2)
     
+    # Customer Distribution Map
+    st.subheader("🌍 Customer Distribution by Region")
+    if "customer_state" in df.columns:
+        map_data = df.groupby("customer_state")["payment_value"].sum().reset_index()
+        fig_map = px.choropleth(map_data, locations="customer_state", locationmode="Brazil-states", 
+                                color="payment_value", title="Sales by Region")
+        st.plotly_chart(fig_map)
 
 # Product Analysis Tab
 elif tab == "Product Analysis":
@@ -150,6 +158,7 @@ if tab == "Economic Trends":
     time_granularity = st.radio("Select Time Period", ["Monthly", "Yearly"], horizontal=True)
 
     # Fetch FRED Data
+    @st.cache_data
     def fetch_fred_data(series_id, start_date, end_date):
         url = f"https://api.stlouisfed.org/fred/series/observations"
         params = {
