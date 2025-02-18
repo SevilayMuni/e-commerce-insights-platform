@@ -20,7 +20,7 @@ def load_data():
     geo_df = pd.read_parquet('./data/geo_df.parquet', engine='pyarrow')
     customer_df = pd.read_csv('./data/customer-segmentation.csv')
     clv_df = pd.read_csv('./data/customer-lifetime-value.csv')
-    return df, customer_df, clv_df
+    return df, geo_df, customer_df, clv_df
 
 df, customer_df, clv_df = load_data()
 
