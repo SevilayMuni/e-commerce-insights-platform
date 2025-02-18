@@ -97,7 +97,7 @@ if tab == "Customer Insights":
         clv_df["quarter"] = clv_df["quarter"].astype(str)  # Convert quarter to string for proper axis formatting
         fig_clv = px.line(clv_df, x="quarter", y=["clv", "weighted_clv"], 
                           title="Customer Lifetime Value (CLV) Over Time",
-                          labels={"variable": "Variable", "clv": "CLV", "weighted_clv": "Weighted CLV"},
+                          labels={"quarter": "Quarter", "value": "Value", "variable": "Variable", "clv": "CLV", "weighted_clv": "Weighted CLV"},
                           color_discrete_map={"clv": "teal", "weighted_clv": "firebrick"})
         st.plotly_chart(fig_clv)
     # Churn Risk Analysis
