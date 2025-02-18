@@ -85,12 +85,13 @@ if tab == "Customer Insights":
     # RFM Analysis
     st.subheader("📌 Customer Segmentation (RFM)")
     fig1 = px.scatter(
-        filtered_customer_df, x="frequency", y="total_spending", color="segment", symbol="segment",
+        filtered_customer_df, x="frequency", y="total_spending", color="segment",
         title="Customer Segments Based on Frequency & Spending",
         labels={"segment": "Segment", "frequency": "Total Orders", "total_spending": "Total Spending"},
-        size_max=14,
+        size_max=13,
         hover_data=["customer_id"])
     st.plotly_chart(fig1)
+    
     # CLV Graph
     if tab == "Customer Insights":
         st.subheader("📊 Customer Lifetime Value (CLV)")
