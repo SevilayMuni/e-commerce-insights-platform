@@ -85,7 +85,7 @@ if tab == "Customer Insights":
     # RFM Analysis
     st.subheader("📌 Customer Segmentation (RFM)")
     fig1 = px.scatter(
-        filtered_customer_df, x="frequency", y="total_spending", color="segment", symbol="segment"
+        filtered_customer_df, x="frequency", y="total_spending", color="segment", symbol="segment",
         title="Customer Segments Based on Frequency & Spending",
         labels={"segment": "Segment", "frequency": "Total Orders", "total_spending": "Total Spending"},
         size_max=10,
