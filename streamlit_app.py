@@ -113,9 +113,8 @@ if tab == "Customer Insights":
         geo_df["city_revenue"] = geo_df.groupby("customer_city")["payment_value"].sum()
         geo_df["payment_value"] = geo_df["payment_value"].fillna(0)
         fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
-                                    color="payment_value", hover_name="customer_city",
-                                    hover_data={"payment_value": True}, zoom=4,
-                                    title="")
+                                    size="payment_value", hover_name="customer_city",
+                                    hover_data={"payment_value": True}, color_discrete_sequence= ["plum"], zoom=4)
         fig_map.update_layout(mapbox_style="open-street-map")
         st.plotly_chart(fig_map)
 
