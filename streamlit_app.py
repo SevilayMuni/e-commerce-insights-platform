@@ -37,8 +37,8 @@ with st.sidebar.expander("🔍 Filter Data"):
     
     # Checkbox-based segment selection with default selections
     st.write("Select Customer Segments:")
-    selected_segments = []  # Use 'selected_segments' to store selected segments
-    default_segments = ["promising customer", "at risk customer"]  # Default segments
+    selected_segments = []
+    default_segments = ["promising customer", "at risk customer"]
     for segment in cleaned_segment_options:
         if st.checkbox(segment, value=(segment in default_segments)):
             selected_segments.append(segment)
@@ -82,15 +82,21 @@ if tab == "Customer Insights":
     col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
 
     # RFM Analysis
-    st.subheader("📌 Customer Segmentation (RFM)")
-    fig1 = px.scatter(
-        filtered_customer_df, x="frequency", y="total_spending", color="segment",
-        title="Customer Segments Based on Frequency & Spending",
-        labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
-        size_max=10,
-        hover_data=["customer_id"]
-    )
+    # RFM Analysis
+    if not filtered_customer_df.empty:
+        st.subheader("📌 Customer Segmentation (RFM)")
+        fig1 = px.scatter(
+            filtered_customer_df, x="frequency", y="total_spending", color="segment",
+            title="Customer Segments Based on Frequency & Spending",
+            labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
+            size_max=10,
+            hover_data=["customer_id"]
+        )
+        st.plotly_chart(fig1)
+    else:
+        st.warning("No data available for the selected segments. Please adjust your filters.")
     st.plotly_chart(fig1)
+    
     # CLV Graph
     if tab == "Customer Insights":
         st.subheader("📊 Customer Lifetime Value (CLV)")
@@ -98,7 +104,7 @@ if tab == "Customer Insights":
         fig_clv = px.line(clv_df, x="quarter", y=["clv", "weighted_clv"], 
                           title="Customer Lifetime Value (CLV) Over Time",
                           labels={"quarter": "Quarter", "value": "CLV"},
-                          color_discrete_map={"clv": "teal", "weighted_clv": "orange"})
+                          color_discrete_map={"clv": "teal", "weighted_clv": "firebrick"})
         st.plotly_chart(fig_clv)
     # Churn Risk Analysis
     st.subheader("⚠️ Churn Risk Analysis")
