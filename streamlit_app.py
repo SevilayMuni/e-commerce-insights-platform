@@ -141,6 +141,28 @@ elif tab == "Product Analysis":
     st.plotly_chart(fig4)
 
 # Economic Trends Tab
+# Fetch FRED Data
+@st.cache_data
+def fetch_fred_data(series_id, start_date, end_date):
+    url = f"https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        "series_id": series_id,
+        "api_key": FRED_API_KEY,
+        "file_type": "json",
+        "observation_start": start_date,
+        "observation_end": end_date
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        df = pd.DataFrame(data["observations"])
+        df["date"] = pd.to_datetime(df["date"])
+        df["value"] = pd.to_numeric(df["value"], errors="coerce")  # Ensure 'value' is numeric
+        return df
+    else:
+        st.error("Failed to fetch data from FRED API.")
+        return pd.DataFrame()
+
 if tab == "Economic Trends":
     st.title("📈 Economic Trends")
     
@@ -154,66 +176,77 @@ if tab == "Economic Trends":
 
     # Metric Selectbox
     st.subheader("Select Economic Metric")
-    metric_options = ["Inflation (CPI)", "Interest Rates (Federal Funds Rate)", "Unemployment Rate", "Retail Sales"]
-    selected_metric = st.selectbox("Choose a metric", metric_options, index=3)  # Default to Retail Sales
-    # Year Selection
-    year_selected = st.slider("Select Year", min_value=2010, max_value=2025, value=2024)
+    metric_options = ["Inflation (CPI)", "Interest Rates (Federal Funds Rate)", "Unemployment Rate"]
+    selected_metric = st.selectbox("Choose a metric", metric_options, index=0)  # Default to Retail Sales
+
+    # Date Range Selection
+    st.subheader("Select Date Range")
+    start_date = st.date_input("Start Date", datetime.date(2020, 1, 1))
+    end_date = st.date_input("End Date", datetime.date(2023, 12, 31))
+
     # Time Granularity Selection
-    time_granularity = st.radio("Select Time Period", ["Monthly", "Yearly"], horizontal=True)
+    st.subheader("Select Time Granularity")
+    time_granularity = st.radio("Choose a time period", ["Weekly", "Monthly", "Yearly"], index=1, horizontal=True)
 
-    # Fetch FRED Data
-    @st.cache_data
-    def fetch_fred_data(series_id, start_date, end_date):
-        url = f"https://api.stlouisfed.org/fred/series/observations"
-        params = {
-            "series_id": series_id,
-            "api_key": FRED_API_KEY,
-            "file_type": "json",
-            "observation_start": start_date,
-            "observation_end": end_date
-        }
-        response = requests.get(url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            df = pd.DataFrame(data["observations"])
-            df["date"] = pd.to_datetime(df["date"])
-            df["value"] = pd.to_numeric(df["value"], errors="coerce")  # Ensure 'value' is numeric
-            return df
-        else:
-            st.error("Failed to fetch data from FRED API.")
-            return pd.DataFrame()
-
-    # Define FRED Series IDs
+    # Fetch Data for Selected Metric and Retail Sales
     fred_series = {
         "Inflation (CPI)": "CPIAUCSL",
         "Interest Rates (Federal Funds Rate)": "FEDFUNDS",
         "Unemployment Rate": "UNRATE",
-        "Retail Sales": "RSXFS"
-    }
+        "Retail Sales": "RSXFS"}
 
-    # Date Range for FRED Data
-    start_date = f"{year_selected}-01-01"
-    end_date = f"{year_selected}-12-31"
+    # Fetch data for the selected metric
+    selected_series_id = fred_series[selected_metric]
+    selected_metric_df = fetch_fred_data(selected_series_id, start_date, end_date)
 
-    # Fetch and Display Economic Data
-    series_id = fred_series[selected_metric]
-    fred_df = fetch_fred_data(series_id, start_date, end_date)
-    if not fred_df.empty:
-        st.subheader(f"{selected_metric} Over Time")
-        fig = px.line(fred_df, x="date", y="value", title=f"{selected_metric} Over Time")
+    # Fetch data for Retail Sales
+    retail_sales_series_id = fred_series["Retail Sales"]
+    retail_sales_df = fetch_fred_data(retail_sales_series_id, start_date, end_date)
+
+    # Check if data is available
+    if not selected_metric_df.empty and not retail_sales_df.empty:
+        # Merge the two datasets on the 'date' column
+        merged_df = pd.merge(selected_metric_df, retail_sales_df, on="date", suffixes=("_metric", "_retail"))
+
+        # Resample data based on selected time granularity
+        merged_df.set_index("date", inplace=True)
+        if time_granularity == "Weekly":
+            resampled_df = merged_df.resample("W").mean(numeric_only=True)
+        elif time_granularity == "Monthly":
+            resampled_df = merged_df.resample("M").mean(numeric_only=True)
+        elif time_granularity == "Yearly":
+            resampled_df = merged_df.resample("Y").mean(numeric_only=True)
+
+        # Plot Dual-Axis Line Chart
+        st.subheader(f"{selected_metric} vs Retail Sales Over Time")
+        fig = go.Figure()
+
+        # Add selected metric trace
+        fig.add_trace(go.Scatter(
+            x=resampled_df.index,
+            y=resampled_df["value_metric"],
+            name=selected_metric,
+            line=dict(color="purple")
+        ))
+
+        # Add Retail Sales trace
+        fig.add_trace(go.Scatter(
+            x=resampled_df.index,
+            y=resampled_df["value_retail"],
+            name="Retail Sales",
+            line=dict(color="royalblue"),
+            yaxis="y2"  # Use secondary y-axis
+        ))
+
+        # Update layout for dual-axis
+        fig.update_layout(
+            title=f"{selected_metric} vs Retail Sales Over Time",
+            xaxis_title="Date",
+            yaxis_title=selected_metric,
+            yaxis2=dict(title="Retail Sales", overlaying="y", side="right"),
+            legend=dict(x=0.02, y=0.98))
+
         st.plotly_chart(fig)
 
-        # Resample data based on selected time period
-        fred_df.set_index("date", inplace=True)
-        if time_granularity == "Monthly":
-            resampled_df = fred_df.resample("M").mean(numeric_only=True)
-        elif time_granularity == "Yearly":
-            resampled_df = fred_df.resample("Y").mean(numeric_only=True)
-
-        # Display resampled data
-        st.write(f"**{time_granularity} {selected_metric}:**")
-        st.line_chart(resampled_df)
     else:
-        st.warning(f"No data available for {selected_metric}.")
-
-    
+        st.warning("No data available for the selected metrics and date range.")
