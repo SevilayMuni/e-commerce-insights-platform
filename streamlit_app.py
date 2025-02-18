@@ -89,7 +89,7 @@ if tab == "Customer Insights":
         labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
         size_max=10,
         hover_data=["customer_id"])
-    
+    st.plotly_chart(fig1)
     # CLV Graph
     if tab == "Customer Insights":
         st.subheader("📊 Customer Lifetime Value (CLV)")
