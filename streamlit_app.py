@@ -36,10 +36,12 @@ with st.sidebar.expander("🔍 Filter Data"):
     cleaned_segment_options = [seg.strip().replace(" x", "") for seg in segment_options]
     
     # Checkbox-based segment selection with default selections
-    # Ensure default selection of customer segments
     st.write("Select Customer Segments:")
-    default_segments = ["Promising Customers", "At Risk Customers"]
-    selected_segments = st.multiselect("Customer Segments", cleaned_segment_options, default=default_segments)
+    selected_segments = []  # Use 'selected_segments' to store selected segments
+    default_segments = ["Promising Customers", "At Risk Customers"]  # Default segments
+    for segment in cleaned_segment_options:
+        if st.checkbox(segment, value=(segment in default_segments)):
+            selected_segments.append(segment)
     
     # Date Range Picker
     date_range = st.date_input(
