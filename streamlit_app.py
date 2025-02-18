@@ -66,6 +66,7 @@ filtered_customer_df = customer_df[customer_df["segment"].isin(selected_segments
 # Dynamic Key Metrics
 total_customers = filtered_df['customer_unique_id'].nunique()
 total_revenue = filtered_df['payment_value'].sum()
+formatted_revenue = f"${total_revenue/1e6:.2f}M" if total_revenue > 1e6 else f"${total_revenue:,.2f}"
 avg_order_value = filtered_df['payment_value'].mean()
 churn_rate = (filtered_df[filtered_df['recency'] > churn_threshold].shape[0] / total_customers) * 100
 
@@ -76,7 +77,7 @@ if tab == "Customer Insights":
     # Key Metrics in Cards
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Customers", f"{total_customers:,}", help="Total unique customers in the selected segment and date range.")
-    col2.metric("Total Revenue", f"${total_revenue:,.2f}", help="Total revenue generated in the selected segment and date range.")
+    col2.metric("Total Revenue", f"${formatted_revenue:,.2f}", help="Total revenue generated in the selected segment and date range.")
     col3.metric("Average Order Value", f"${avg_order_value:,.2f}", help="Average value of orders in the selected segment and date range.")
     col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
 
@@ -135,12 +136,15 @@ if tab == "Economic Trends":
     st.subheader("Select Economic Metric")
     metric_options = ["Inflation (CPI)", "Interest Rates (Federal Funds Rate)", "Unemployment Rate", "Retail Sales"]
     selected_metric = st.selectbox("Choose a metric", metric_options, index=3)  # Default to Retail Sales
-
+    # Year Selection
+    year_selected = st.slider("Select Year", min_value=2010, max_value=2025, value=2024)
+    # Time Granularity Selection
+    time_granularity = st.radio("Select Time Granularity", ["Monthly", "Yearly"], horizontal=True)
     # Time Period Select Slider
     st.subheader("Select Time Period")
     time_period = st.select_slider(
         "Choose a time period",
-        options=["Weekly", "Monthly", "Yearly"],
+        options=["Monthly", "Yearly"],
         value="Monthly"  # Default to Monthly
     )
 
