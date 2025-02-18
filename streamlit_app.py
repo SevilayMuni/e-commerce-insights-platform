@@ -108,14 +108,14 @@ if tab == "Customer Insights":
     st.plotly_chart(fig2)
     
     # Customer Distribution Map by City
-    st.subheader("🌍 Customer Distribution by City")
+    st.subheader("🌍 Customer & Revenue Distribution by City")
     if "geolocation_lat" in geo_df.columns and "geolocation_lng" in geo_df.columns:
         geo_df["city_revenue"] = geo_df.groupby("customer_city")["payment_value"].sum()
         geo_df["payment_value"] = geo_df["payment_value"].fillna(0)
         fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
-                                    size="payment_value", hover_name="customer_city",
+                                    color="payment_value", hover_name="customer_city",
                                     hover_data={"payment_value": True}, zoom=4,
-                                    title="Customer Revenue by City")
+                                    title="")
         fig_map.update_layout(mapbox_style="open-street-map")
         st.plotly_chart(fig_map)
 
