@@ -48,8 +48,7 @@ with st.sidebar.expander("🔍 Filter Data"):
     # Date Range Picker
     date_range = st.date_input(
         "Select Date Range", 
-        [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()]
-    )
+        [df["order_purchase_timestamp"].min(), df["order_purchase_timestamp"].max()])
     
     # Product Categories
     product_category = st.multiselect(
@@ -86,9 +85,9 @@ if tab == "Customer Insights":
     # RFM Analysis
     st.subheader("📌 Customer Segmentation (RFM)")
     fig1 = px.scatter(
-        filtered_customer_df, x="frequency", y="total_spending", color="segment",
+        filtered_customer_df, x="frequency", y="total_spending", color="segment", symbol="segment"
         title="Customer Segments Based on Frequency & Spending",
-        labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
+        labels={"segment": "Segment", "frequency": "Total Orders", "total_spending": "Total Spending"},
         size_max=10,
         hover_data=["customer_id"])
     st.plotly_chart(fig1)
@@ -111,6 +110,7 @@ if tab == "Customer Insights":
     st.subheader("🌍 Customer Distribution by City")
     if "geolocation_lat" in geo_df.columns and "geolocation_lng" in geo_df.columns:
         geo_df["city_revenue"] = geo_df.groupby("customer_city")["payment_value"].sum()
+        geo_df["payment_value"] = geo_df["payment_value"].fillna(0)
         fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
                                     size="payment_value", hover_name="customer_city",
                                     hover_data={"payment_value": True}, zoom=4,
