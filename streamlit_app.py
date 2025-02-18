@@ -36,13 +36,11 @@ with st.sidebar.expander("🔍 Filter Data"):
     cleaned_segment_options = [seg.strip().replace(" x", "") for seg in segment_options]
     
     # Checkbox-based segment selection with default selections
+    # Ensure default selection of customer segments
     st.write("Select Customer Segments:")
-    selected_segments = []
-    default_segments = ["promising customer", "at risk customer"]
-    for segment in cleaned_segment_options:
-        if st.checkbox(segment, value=(segment in default_segments)):
-            selected_segments.append(segment)
-  
+    default_segments = ["Promising Customers", "At Risk Customers"]
+    selected_segments = st.multiselect("Customer Segments", cleaned_segment_options, default=default_segments)
+    
     # Date Range Picker
     date_range = st.date_input(
         "Select Date Range", 
@@ -82,20 +80,13 @@ if tab == "Customer Insights":
     col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
 
     # RFM Analysis
-    # RFM Analysis
-    if not filtered_customer_df.empty:
-        st.subheader("📌 Customer Segmentation (RFM)")
-        fig1 = px.scatter(
-            filtered_customer_df, x="frequency", y="total_spending", color="segment",
-            title="Customer Segments Based on Frequency & Spending",
-            labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
-            size_max=10,
-            hover_data=["customer_id"]
-        )
-        st.plotly_chart(fig1)
-    else:
-        st.warning("No data available for the selected segments. Please adjust your filters.")
-    st.plotly_chart(fig1)
+    st.subheader("📌 Customer Segmentation (RFM)")
+    fig1 = px.scatter(
+        filtered_customer_df, x="frequency", y="total_spending", color="segment",
+        title="Customer Segments Based on Frequency & Spending",
+        labels={"frequency": "Total Orders", "total_spending": "Total Spending"},
+        size_max=10,
+        hover_data=["customer_id"])
     
     # CLV Graph
     if tab == "Customer Insights":
