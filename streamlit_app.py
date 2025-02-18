@@ -22,7 +22,7 @@ def load_data():
     clv_df = pd.read_csv('./data/customer-lifetime-value.csv')
     return df, geo_df, customer_df, clv_df
 
-df, customer_df, clv_df = load_data()
+df, geo_df, customer_df, clv_df = load_data()
 
 # Top Navigation Bar
 st.sidebar.title("Navigation")
