@@ -4,7 +4,7 @@ This project provides an end-to-end data analytics pipeline for customer segment
 The analysis includes RFM (Recency, Frequency, Monetary) and K-Means segmentation, customer lifetime value (CLV) calculation, and other insights to drive strategic marketing decisions.
 
 ## 🖥️ Check Out eCommerce-SegmenTrack App
-[![eCommerce-SegmenTrack](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://ecommerce-segmentrack.streamlit.app/)
+[![eCommerce-SegmenTrack](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecommerce-segmentrack.streamlit.app/)
 
 ## 🚀 Key Features
 - **Customer Segmentation**: Using RFM analysis to segment customers into actionable groups such as "Lost Customers," "Potential Loyalists," "Loyal Customers," and more.   
