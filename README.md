@@ -16,15 +16,15 @@ The analysis includes RFM (Recency, Frequency, Monetary) and K-Means segmentatio
 
 ## 📂 Repository Structure
 📦 eCommerce-Segmentation-Dashboard  
-│── data/                     # Contains processed datasets (Parquet and CSV files)   
-│── e-commerce-segmentation.ipynb   # Jupyter Notebook for data analysis & model building   
-│── streamlit_app.py           # Streamlit dashboard script   
-│── requirements.txt           # List of dependencies   
-│── README.md                  # Project documentation (this file)  
+│── data/                             # Contains processed datasets (Parquet and CSV files)   
+│── e-commerce-segmentation.ipynb     # Jupyter Notebook for data analysis & model building   
+│── streamlit_app.py                  # Streamlit dashboard script   
+│── requirements.txt                  # List of dependencies   
+│── README.md                         # Project documentation (this file)  
 
 
 ## 🔗 Dataset
-The project is based on the Brazilian E-Commerce Public Dataset by Olist, containing over 100,000 orders from 2016 to 2018, including order status, payment details, customer location, product attributes, and reviews.
+The project is based on the Brazilian E-Commerce Public Dataset by Olist, containing over 100,000 orders from 2016 to 2018, including order status, payment details, customer location, product attributes, and reviews.   
 [Dataset Link](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
 
 ## Acknowledgments
@@ -33,8 +33,6 @@ The project is based on the Brazilian E-Commerce Public Dataset by Olist, contai
 - FRED (Federal Reserve Economic Data) for economic trend data.
 
 ## 👩‍💻 Author
-📌 Developed by Sevilay Munire Girgin
-📧 [Contact Me](https://linktr.ee/sevilaymgirgin)
+📌 Developed by Sevilay Munire Girgin   
+📧 [Contact Me](https://linktr.ee/sevilaymgirgin)   
 🌐 [Portfolio](sevilaymuni.github.io/Girgin)
-
-
