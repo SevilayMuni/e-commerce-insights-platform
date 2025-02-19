@@ -167,26 +167,26 @@ if tab == "Geolocation Analysis":
     
         # Create Sankey diagram
         fig_sankey = go.Figure(go.Sankey(
-            node=dict(
-                pad=15,  # Space between nodes
-                thickness=20,  # Thickness of nodes
-                line=dict(color="black", width=0.5),  # Node border
-                label=list(unique_seller_cities) + list(unique_product_categories),  # Labels for nodes
-                # Customize font for labels
-                font=dict(
-                    size=14,  # Font size
-                    color="black",  # Font color
-                    family="Arial",  # Font family
-                    weight="bold"  # Font weight
-                )
-            ),   
-            link=dict(
-                source=seller_product_flow['source'],  # Source nodes (seller cities)
-                target=seller_product_flow['target'],  # Target nodes (product categories)
-                value=seller_product_flow['count'],  # Flow value (number of orders)
-                color="rgba(186, 126, 255, 0.13)"  # Color of the links
+        node=dict(
+            pad=15,  # Space between nodes
+            thickness=20,  # Thickness of nodes
+            line=dict(color="black", width=0.5),  # Node border
+            label=list(unique_seller_cities) + list(unique_product_categories),  # Labels for nodes
+            # Customize font for labels
+            font=dict(
+                size=14,  # Font size
+                color="black",  # Font color
+                family="Arial",  # Font family
+                weight="bold"  # Font weight
             )
-        ))
+        ),
+        link=dict(
+            source=seller_product_flow['source'],  # Source nodes (seller cities)
+            target=seller_product_flow['target'],  # Target nodes (product categories)
+            value=seller_product_flow['count'],  # Flow value (number of orders)
+            color="rgba(186, 126, 255, 0.13)"  # Color of the links
+        )
+    ))
     
         # Update layout for better visualization
         fig_sankey.update_layout(
