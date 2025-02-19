@@ -23,7 +23,7 @@ df, geo_df, customer_df, clv_df = load_data()
 
 # Top Navigation Bar
 st.sidebar.title("Navigation")
-tab = st.sidebar.radio("Go to", ["Customer Insights", "Product Analysis", "Economic Trends"])
+tab = st.sidebar.radio("Go to", ["Customer Analysis", "Product Analysis", "Geolocation Analysis", "Economic Trends"])
 
 
 # Collapsible Filters
@@ -68,7 +68,7 @@ formatted_revenue = f"${total_revenue/1e6:.2f}M" if total_revenue > 1e6 else f"$
 avg_order_value = filtered_df['payment_value'].mean()
 churn_rate = (filtered_df[filtered_df['recency'] > churn_threshold].shape[0] / total_customers) * 100
 
-def create_interactive_visualizations(filtered_df, filtered_customer_df):
+def create_interactive_visualizations(filtered_customer_df):
     # RFM Analysis with click events
     st.subheader("📌 Customer Segmentation (RFM)")
     fig1 = px.scatter(
@@ -85,82 +85,10 @@ def create_interactive_visualizations(filtered_df, filtered_customer_df):
         st.write(f"Selected Customer ID: {click_data['points'][0]['customdata'][0]}")
         st.write("Insights: This customer is in the selected segment. Consider personalized offers to increase engagement.")
 
-    # Sankey Diagram for Customer Journey
-    st.subheader("📊 Customer Journey (Sankey Diagram)")
-    sankey_data = filtered_df.groupby(['customer_unique_id', 'product_category']).size().reset_index(name='count')
-    
-    # Limit the number of nodes
-    top_customers = sankey_data['customer_unique_id'].value_counts().nlargest(20).index
-    top_categories = sankey_data['product_category'].value_counts().nlargest(10).index
-    sankey_data = sankey_data[
-        sankey_data['customer_unique_id'].isin(top_customers) &
-        sankey_data['product_category'].isin(top_categories)
-    ]
-    
-    # Normalize the source and target values
-    unique_customers = sankey_data['customer_unique_id'].unique()
-    unique_categories = sankey_data['product_category'].unique()
-    
-    customer_to_code = {customer: idx for idx, customer in enumerate(unique_customers)}
-    category_to_code = {category: idx + len(unique_customers) for idx, category in enumerate(unique_categories)}
-    
-    sankey_data['source'] = sankey_data['customer_unique_id'].map(customer_to_code)
-    sankey_data['target'] = sankey_data['product_category'].map(category_to_code)
-    
-    with st.spinner("Generating Sankey Diagram..."):
-        fig_sankey = go.Figure(go.Sankey(
-            node=dict(
-                pad=15,
-                thickness=20,
-                line=dict(color="black", width=0.5),
-                label=list(unique_customers) + list(unique_categories)
-            ),
-            link=dict(
-                source=sankey_data['source'],
-                target=sankey_data['target'],
-                value=sankey_data['count']
-            )
-        ))
-        st.plotly_chart(fig_sankey, use_container_width=True)
-
-    # Network Graph for Customer-Product Relationships
-    st.subheader("🌐 Customer-Product Relationships (Network Graph)")
-    network_data = filtered_df.groupby(['customer_unique_id', 'product_category']).size().reset_index(name='count')
-    
-    # Limit the number of nodes
-    top_customers = network_data['customer_unique_id'].value_counts().nlargest(20).index
-    top_categories = network_data['product_category'].value_counts().nlargest(10).index
-    network_data = network_data[
-        network_data['customer_unique_id'].isin(top_customers) &
-        network_data['product_category'].isin(top_categories)
-    ]
-    
-    # Normalize customer and product IDs
-    unique_customers = network_data['customer_unique_id'].unique()
-    unique_categories = network_data['product_category'].unique()
-    
-    customer_to_code = {customer: idx for idx, customer in enumerate(unique_customers)}
-    category_to_code = {category: idx + len(unique_customers) for idx, category in enumerate(unique_categories)}
-    
-    network_data['customer_code'] = network_data['customer_unique_id'].map(customer_to_code)
-    network_data['category_code'] = network_data['product_category'].map(category_to_code)
-    
-    with st.spinner("Generating Network Graph..."):
-        fig_network = px.scatter(network_data, x='customer_code', y='category_code', size='count', color='count',
-                                 title="Customer-Product Relationships",
-                                 labels={'customer_code': 'Customer ID', 'category_code': 'Product Category'})
-        st.plotly_chart(fig_network, use_container_width=True)
-
-# Insights and Recommendations
-def display_insights_and_recommendations():
-    st.subheader("💡 Insights and Recommendations")
-    st.info("**Insight:** Customers in the 'At Risk' segment have a high churn rate. **Recommendation:** Implement targeted retention campaigns.")
-    st.success("**Insight:** Electronics is the top-selling category. **Recommendation:** Increase stock levels and promotions for Electronics.")
-    st.warning("**Insight:** Customers with high recency are likely to churn. **Recommendation:** Offer discounts to re-engage these customers.")
 
 # Customer Insights Tab
-if tab == "Customer Insights":
-    st.title("👥 Customer Insights")
+if tab == "Customer Analysis":
+    st.title("👥 Customer Analysis")
     
     # Key Metrics in Cards
     col1, col2, col3, col4 = st.columns(4)
@@ -170,36 +98,20 @@ if tab == "Customer Insights":
     col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
 
     # Interactive Visualizations
-    create_interactive_visualizations(filtered_df, filtered_customer_df)
-    # Insights and Recommendations
-    display_insights_and_recommendations()
-    
+    create_interactive_visualizations(filtered_customer_df)
+
     # CLV Graph
-    if tab == "Customer Insights":
-        st.subheader("📊 Customer Lifetime Value (CLV)")
-        clv_df["quarter"] = clv_df["quarter"].astype(str)  # Convert quarter to string for proper axis formatting
-        fig_clv = px.line(clv_df, x="quarter", y=["clv", "weighted_clv"], 
-                          title="Customer Lifetime Value (CLV) Over Time",
-                          labels={"quarter": "Quarter", "value": "Value", "variable": "Variable", "clv": "CLV", "weighted_clv": "Weighted CLV"},
-                          color_discrete_map={"clv": "teal", "weighted_clv": "firebrick"})
-        st.plotly_chart(fig_clv)
+    clv_df["quarter"] = clv_df["quarter"].astype(str)  # Convert quarter to string for proper axis formatting
+    fig_clv = px.line(clv_df, x="quarter", y=["clv", "weighted_clv"], 
+                        title="📊 Customer Lifetime Value (CLV) Over Time",
+                        labels={"quarter": "Quarter", "value": "Value", "variable": "Variable", "clv": "CLV", "weighted_clv": "Weighted CLV"},
+                        color_discrete_map={"clv": "teal", "weighted_clv": "firebrick"})
+    st.plotly_chart(fig_clv)
     
     # Churn Risk Analysis
-    st.subheader("⚠️ Churn Risk Analysis")
     filtered_df["churn_risk"] = filtered_df["recency"].apply(lambda x: "High Risk" if x > churn_threshold else "Low Risk")
-    fig2 = px.pie(filtered_df, names="churn_risk", title="Churn Risk Distribution")
+    fig2 = px.pie(filtered_df, names="churn_risk", title="⚠️ Churn Risk Distribution")
     st.plotly_chart(fig2)
-    
-    # Customer Distribution Map by City
-    st.subheader("🌍 Customer & Revenue Distribution by City")
-    if "geolocation_lat" in geo_df.columns and "geolocation_lng" in geo_df.columns:
-        geo_df["city_revenue"] = geo_df.groupby("customer_city")["payment_value"].sum()
-        geo_df["payment_value"] = geo_df["payment_value"].fillna(0)
-        fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
-                                    size="payment_value", hover_name="customer_city",
-                                    hover_data={"payment_value": True}, color_discrete_sequence= ["plum"], zoom=4)
-        fig_map.update_layout(mapbox_style="open-street-map")
-        st.plotly_chart(fig_map)
 
 # Product Analysis Tab
 elif tab == "Product Analysis":
@@ -222,6 +134,82 @@ elif tab == "Product Analysis":
     treemap_data = filtered_df.groupby('product_category')['payment_value'].sum().reset_index()
     fig4 = px.treemap(treemap_data, path=['product_category'], values='payment_value', title="Revenue by Product Category")
     st.plotly_chart(fig4)
+
+    # Network Graph for Customer Segments and Products
+    st.subheader("🌐 Customer Segments and Product Connections (Network Graph)")
+    segment_product_data = filtered_df.merge(filtered_customer_df, on='customer_unique_id')
+    segment_product_data = segment_product_data.groupby(['segment', 'product_category']).size().reset_index(name='count')
+    
+    # Limit the number of nodes
+    top_segments = segment_product_data['segment'].value_counts().nlargest(5).index
+    top_products = segment_product_data['product_category'].value_counts().nlargest(10).index
+    segment_product_data = segment_product_data[
+        segment_product_data['segment'].isin(top_segments) &
+        segment_product_data['product_category'].isin(top_products)]
+    
+    # Normalize segment and product IDs
+    unique_segments = segment_product_data['segment'].unique()
+    unique_products = segment_product_data['product_category'].unique()
+    
+    segment_to_code = {segment: idx for idx, segment in enumerate(unique_segments)}
+    product_to_code = {product: idx + len(unique_segments) for idx, product in enumerate(unique_products)}
+    
+    segment_product_data['segment_code'] = segment_product_data['segment'].map(segment_to_code)
+    segment_product_data['product_code'] = segment_product_data['product_category'].map(product_to_code)
+    
+    
+    fig_segment_product = px.scatter(segment_product_data, x='segment_code', y='product_code', size='count', color='count',
+                                        title="Customer Segments and Product Connections",
+                                        labels={'segment_code': 'Customer Segment', 'product_code': 'Product Category'})
+    st.plotly_chart(fig_segment_product, use_container_width=True)
+
+if tab == "Geolocation Analysis":
+    st.title("🌍 Geolocation Analysis")
+    # Customer Distribution Map by City
+    if "geolocation_lat" in geo_df.columns and "geolocation_lng" in geo_df.columns:
+        geo_df["city_revenue"] = geo_df.groupby("customer_city")["payment_value"].sum()
+        geo_df["payment_value"] = geo_df["payment_value"].fillna(0)
+        fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
+                                    size="payment_value", hover_name="customer_city",
+                                    hover_data={"payment_value": True}, color_discrete_sequence= ["plum"], zoom=4,
+                                    title = "Customer & Revenue Distribution by City")
+        fig_map.update_layout(mapbox_style="open-street-map")
+        st.plotly_chart(fig_map)
+    
+    # Sankey Diagram for Flow of Orders Among Cities
+    st.subheader("🌍 Flow of Orders Among Cities (Sankey Diagram)")
+    city_flow_data = filtered_df.groupby(['customer_city', 'seller_city']).size().reset_index(name='count')
+    
+    # Limit the number of nodes
+    top_customer_cities = city_flow_data['customer_city'].value_counts().nlargest(10).index
+    top_seller_cities = city_flow_data['seller_city'].value_counts().nlargest(10).index
+    city_flow_data = city_flow_data[
+        city_flow_data['customer_city'].isin(top_customer_cities) &
+        city_flow_data['seller_city'].isin(top_seller_cities)]
+    
+    # Normalize the source and target values
+    unique_customer_cities = city_flow_data['customer_city'].unique()
+    unique_seller_cities = city_flow_data['seller_city'].unique()
+    
+    customer_city_to_code = {city: idx for idx, city in enumerate(unique_customer_cities)}
+    seller_city_to_code = {city: idx + len(unique_customer_cities) for idx, city in enumerate(unique_seller_cities)}
+    
+    city_flow_data['source'] = city_flow_data['customer_city'].map(customer_city_to_code)
+    city_flow_data['target'] = city_flow_data['seller_city'].map(seller_city_to_code)
+    
+    fig_city_sankey = go.Figure(go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=list(unique_customer_cities) + list(unique_seller_cities)
+        ),
+        link=dict(
+            source=city_flow_data['source'],
+            target=city_flow_data['target'],
+            value=city_flow_data['count'])))
+    st.plotly_chart(fig_city_sankey, use_container_width=True)
+
 
 # Economic Trends Tab
 # Fetch FRED Data
