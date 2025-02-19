@@ -130,7 +130,7 @@ elif tab == "Product Analysis":
     # Heatmap: Customer Activity Over Time
     heatmap_data = filtered_df.groupby([filtered_df['order_purchase_timestamp'].dt.date, 'product_category']).size().unstack()
     fig3 = px.imshow(heatmap_data, labels=dict(x="Product Category", y="Date", color="Activity"), title="🌐 Customer Activity Heatmap", 
-                     color_continuous_scale='Greens', hover_data={"Activity": True})
+                     color_continuous_scale='Greens')
     st.plotly_chart(fig3)
 
 if tab == "Geolocation Analysis":
