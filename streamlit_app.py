@@ -147,18 +147,7 @@ elif tab == "Product Analysis":
         segment_product_data['segment'].isin(top_segments) &
         segment_product_data['product_category'].isin(top_products)]
     
-    # Normalize segment and product IDs
-    unique_segments = segment_product_data['segment'].unique()
-    unique_products = segment_product_data['product_category'].unique()
-    
-    segment_to_code = {segment: idx for idx, segment in enumerate(unique_segments)}
-    product_to_code = {product: idx + len(unique_segments) for idx, product in enumerate(unique_products)}
-    
-    segment_product_data['segment_code'] = segment_product_data['segment'].map(segment_to_code)
-    segment_product_data['product_code'] = segment_product_data['product_category'].map(product_to_code)
-    
-    
-    fig_segment_product = px.scatter(segment_product_data, x='segment_code', y='product_code', size='count', color='count',
+    fig_segment_product = px.scatter(segment_product_data, x='segment', y='product_category', size='count', color='count',
                                         title="Customer Segments and Product Connections",
                                         labels={'segment_code': 'Customer Segment', 'product_code': 'Product Category'})
     st.plotly_chart(fig_segment_product, use_container_width=True)
