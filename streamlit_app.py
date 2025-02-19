@@ -69,7 +69,7 @@ avg_order_value = filtered_df['payment_value'].mean()
 churn_rate = (filtered_df[filtered_df['recency'] > churn_threshold].shape[0] / total_customers) * 100
 
 # Function to create interactive visualizations
-def create_interactive_visualizations(filtered_df, filtered_customer_df):
+def create_interactive_visualizations(filtered_customer_df):
         # RFM Analysis with click events
         st.subheader("📌 Customer Segmentation (RFM)")
         fig1 = px.scatter(
@@ -86,30 +86,6 @@ def create_interactive_visualizations(filtered_df, filtered_customer_df):
             st.write(f"Selected Customer ID: {click_data['points'][0]['customdata'][0]}")
             st.write("Insights: This customer is in the selected segment. Consider personalized offers to increase engagement.")
     
-        # Sankey Diagram for Customer Journey
-        st.subheader("📊 Customer Journey (Sankey Diagram)")
-        sankey_data = filtered_df.groupby(['customer_unique_id', 'product_category']).size().reset_index(name='count')
-        fig_sankey = go.Figure(go.Sankey(
-            node=dict(
-                pad=15,
-                thickness=20,
-                line=dict(color="black", width=0.5),
-                label=list(sankey_data['customer_unique_id'].unique()) + list(sankey_data['product_category'].unique())
-            ),
-            link=dict(
-                source=sankey_data['customer_unique_id'].astype('category').cat.codes,
-                target=sankey_data['product_category'].astype('category').cat.codes + len(sankey_data['customer_unique_id'].unique()),
-                value=sankey_data['count']
-            )
-        ))
-        st.plotly_chart(fig_sankey, use_container_width=True)
-    
-        # Network Graph for Customer-Product Relationships
-        st.subheader("🌐 Customer-Product Relationships (Network Graph)")
-        network_data = filtered_df.groupby(['customer_unique_id', 'product_category']).size().reset_index(name='count')
-        fig_network = px.scatter(network_data, x='customer_unique_id', y='product_category', size='count', color='count',
-                                 title="Customer-Product Relationships")
-        st.plotly_chart(fig_network, use_container_width=True)
 
 # Insights and Recommendations
 def display_insights_and_recommendations():
@@ -130,7 +106,52 @@ if tab == "Customer Insights":
     col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
 
     # Interactive Visualizations
-    create_interactive_visualizations(filtered_df, filtered_customer_df)
+    create_interactive_visualizations(filtered_customer_df)
+    
+    # Sankey Diagram for Customer Journey
+    sankey_data = filtered_df.groupby(['customer_unique_id', 'product_category']).size().reset_index(name='count')
+    
+    # Normalize the source and target values to fit within int8 range
+    unique_customers = sankey_data['customer_unique_id'].unique()
+    unique_categories = sankey_data['product_category'].unique()
+    
+    customer_to_code = {customer: idx for idx, customer in enumerate(unique_customers)}
+    category_to_code = {category: idx + len(unique_customers) for idx, category in enumerate(unique_categories)}
+    
+    sankey_data['source'] = sankey_data['customer_unique_id'].map(customer_to_code)
+    sankey_data['target'] = sankey_data['product_category'].map(category_to_code)
+    
+    fig_sankey = go.Figure(go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=list(unique_customers) + list(unique_categories)
+        ),
+        link=dict(
+            source=sankey_data['source'],
+            target=sankey_data['target'],
+            value=sankey_data['count'])
+    ))
+    st.plotly_chart(fig_sankey, use_container_width=True)
+    
+    # Network Graph for Customer-Product Relationships
+    network_data = filtered_df.groupby(['customer_unique_id', 'product_category']).size().reset_index(name='count')
+    
+    # Normalize customer and product IDs
+    unique_customers = network_data['customer_unique_id'].unique()
+    unique_categories = network_data['product_category'].unique()
+    
+    customer_to_code = {customer: idx for idx, customer in enumerate(unique_customers)}
+    category_to_code = {category: idx + len(unique_customers) for idx, category in enumerate(unique_categories)}
+    
+    network_data['customer_code'] = network_data['customer_unique_id'].map(customer_to_code)
+    network_data['category_code'] = network_data['product_category'].map(category_to_code)
+    
+    fig_network = px.scatter(network_data, x='customer_code', y='category_code', size='count', color='count',
+                             title="Customer-Product Relationships",
+                             labels={'customer_code': 'Customer ID', 'category_code': 'Product Category'})
+    st.plotly_chart(fig_network, use_container_width=True)
 
     # Insights and Recommendations
     display_insights_and_recommendations()
@@ -144,6 +165,7 @@ if tab == "Customer Insights":
                           labels={"quarter": "Quarter", "value": "Value", "variable": "Variable", "clv": "CLV", "weighted_clv": "Weighted CLV"},
                           color_discrete_map={"clv": "teal", "weighted_clv": "firebrick"})
         st.plotly_chart(fig_clv)
+    
     # Churn Risk Analysis
     st.subheader("⚠️ Churn Risk Analysis")
     filtered_df["churn_risk"] = filtered_df["recency"].apply(lambda x: "High Risk" if x > churn_threshold else "Low Risk")
