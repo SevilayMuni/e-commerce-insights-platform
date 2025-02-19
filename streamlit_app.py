@@ -37,7 +37,7 @@ with st.sidebar.expander("🔍 Filter Data"):
     # Checkbox-based segment selection with default selections
     st.write("Select Customer Segments:")
     selected_segments = []  # Use 'selected_segments' to store selected segments
-    default_segments = ["Promising Customers", "At Risk Customers"]  # Default segments
+    default_segments = ["Promising Customers", "At Risk Customers", "Lost Customers"]  # Default segments
     for segment in cleaned_segment_options:
         if st.checkbox(segment, value=(segment in default_segments)):
             selected_segments.append(segment)
@@ -50,7 +50,7 @@ with st.sidebar.expander("🔍 Filter Data"):
     # Product Categories
     product_category = st.multiselect(
         "Select Product Categories", 
-        df["product_category"].unique(), default=["Electronics", "Furniture Decor", "Health Beauty"])
+        df["product_category"].unique(), default=["Auto", "Electronics", "Furniture Decor", "Health Beauty"])
     
     # Churn Threshold Slider
     churn_threshold = st.slider("Define Churn Threshold (Days)", min_value=30, max_value=365, value=180)
@@ -134,16 +134,6 @@ elif tab == "Product Analysis":
 
 if tab == "Geolocation Analysis":
     st.title("🌍 Geolocation Analysis")
-    # Customer Distribution Map by City
-    if "geolocation_lat" in geo_df.columns and "geolocation_lng" in geo_df.columns:
-        geo_df["city_revenue"] = geo_df.groupby("customer_city")["payment_value"].sum()
-        geo_df["payment_value"] = geo_df["payment_value"].fillna(0)
-        fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
-                                    size="payment_value", hover_name="customer_city",
-                                    hover_data={"payment_value": True}, color_discrete_sequence= ["plum"], zoom=4,
-                                    title = "🧭 Customer & Revenue Distribution by City")
-        fig_map.update_layout(mapbox_style="open-street-map")
-        st.plotly_chart(fig_map)
     
     # Sankey Diagram for Flow of Orders from Seller Cities to Product Categories
     # Group data by seller_city and product_category
@@ -156,8 +146,7 @@ if tab == "Geolocation Analysis":
     # Filter data to include only top seller cities and product categories
     seller_product_flow = seller_product_flow[
         seller_product_flow['seller_city'].isin(top_seller_cities) &
-        seller_product_flow['product_category'].isin(top_product_categories)
-    ]
+        seller_product_flow['product_category'].isin(top_product_categories)]
     
     # Check if data is empty after filtering
     if seller_product_flow.empty:
@@ -187,24 +176,33 @@ if tab == "Geolocation Analysis":
                 source=seller_product_flow['source'],  # Source nodes (seller cities)
                 target=seller_product_flow['target'],  # Target nodes (product categories)
                 value=seller_product_flow['count'],  # Flow value (number of orders)
-                color="rgba(0, 128, 255, 0.6)"  # Color of the links
+                color="rgba(186, 126, 255, 0.13)"  # Color of the links
             )
         ))
     
         # Update layout for better visualization
         fig_sankey.update_layout(
             title_text="📍 Flow of Orders from Seller Cities to Product Categories",
-            font_size=12,
+            font_size=13,
             height=600  # Adjust height as needed
         )
     
         # Display the Sankey diagram
         st.plotly_chart(fig_sankey, use_container_width=True)
 
+    # Customer Distribution Map by City
+    if "geolocation_lat" in geo_df.columns and "geolocation_lng" in geo_df.columns:
+        geo_df["city_revenue"] = geo_df.groupby("customer_city")["payment_value"].sum()
+        geo_df["payment_value"] = geo_df["payment_value"].fillna(0)
+        fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
+                                    size="payment_value", hover_name="customer_city",
+                                    hover_data={"payment_value": True}, color_discrete_sequence= ["plum"], zoom=4,
+                                    title = "🧭 Customer & Revenue Distribution by City")
+        fig_map.update_layout(mapbox_style="open-street-map")
+        st.plotly_chart(fig_map)
 
 # Economic Trends Tab
 # Fetch FRED Data
-# FRED API Key
 FRED_API_KEY = "fe01e8ff873c535a4652b9f1bc78b788"
 
 @st.cache_data
@@ -311,5 +309,5 @@ if tab == "Economic Trends":
 
     else:
         st.warning("No data available for the selected metrics and date range.")
-
+st.write("")
 st.markdown(''':rainbow[End-to-end project is done by] :blue-background[Sevilay Munire Girgin]''')
