@@ -28,7 +28,7 @@ This project provides an end-to-end data analytics pipeline for customer segment
 
 ## 🔗 Dataset
 The project is based on the Brazilian E-Commerce Public Dataset by Olist, containing over 100,000 orders from 2016 to 2018, including order status, payment details, customer location, product attributes, and reviews.
-![Dataset Link]("https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce")
+[Dataset Link]("https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce")
 
 ## Acknowledgments
 - Olist for providing the Brazilian E-Commerce dataset.
@@ -37,7 +37,7 @@ The project is based on the Brazilian E-Commerce Public Dataset by Olist, contai
 
 ## 👩‍💻 Author
 📌 Developed by Sevilay Munire Girgin
-📧 Contact: [(https://linktr.ee/sevilaymgirgin)]
-🌐 Portfolio: [sevilaymuni.github.io/Girgin]
+📧 Contact: (https://linktr.ee/sevilaymgirgin)
+🌐 Portfolio: (sevilaymuni.github.io/Girgin)
 
 
