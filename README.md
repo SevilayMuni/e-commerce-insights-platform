@@ -3,7 +3,7 @@
 This project provides an end-to-end data analytics pipeline for customer segmentation, personalized marketing insights, and a real-time economic trends dashboard.      Built using Python, machine learning, and Streamlit, it enables businesses to understand customer behavior, segment customers based on purchasing patterns, and design personalized marketing campaigns. 
 The analysis includes RFM (Recency, Frequency, Monetary) and K-Means segmentation, customer lifetime value (CLV) calculation, and other insights to drive strategic marketing decisions.
 
-## 🖥️ Check Out My Application
+## 🖥️ Check Out eCommerce-SegmenTrack App
 [![eCommerce-SegmenTrack](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://ecommerce-segmentrack.streamlit.app/)
 
 ## 🚀 Key Features
