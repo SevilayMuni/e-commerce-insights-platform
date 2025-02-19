@@ -18,17 +18,17 @@ This project provides an end-to-end data analytics pipeline for customer segment
 - **Economic Trends**: Integration with FRED API to analyze economic trends and their potential impact on e-commerce sales.
 
 ## 📂 Repository Structure
-📦 eCommerce-Segmentation-Dashboard
-│── data/                     # Contains processed datasets (Parquet and CSV files)
-│── e-commerce-segmentation.ipynb   # Jupyter Notebook for data analysis & model building
-│── streamlit_app.py           # Streamlit dashboard script
-│── requirements.txt           # List of dependencies
-│── README.md                  # Project documentation (this file)
+📦 eCommerce-Segmentation-Dashboard  
+│── data/                     # Contains processed datasets (Parquet and CSV files)   
+│── e-commerce-segmentation.ipynb   # Jupyter Notebook for data analysis & model building   
+│── streamlit_app.py           # Streamlit dashboard script   
+│── requirements.txt           # List of dependencies   
+│── README.md                  # Project documentation (this file)  
 
 
 ## 🔗 Dataset
 The project is based on the Brazilian E-Commerce Public Dataset by Olist, containing over 100,000 orders from 2016 to 2018, including order status, payment details, customer location, product attributes, and reviews.
-[Dataset Link]("https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce")
+[Dataset Link](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
 
 ## Acknowledgments
 - Olist for providing the Brazilian E-Commerce dataset.
@@ -37,7 +37,7 @@ The project is based on the Brazilian E-Commerce Public Dataset by Olist, contai
 
 ## 👩‍💻 Author
 📌 Developed by Sevilay Munire Girgin
-📧 Contact: (https://linktr.ee/sevilaymgirgin)
-🌐 Portfolio: (sevilaymuni.github.io/Girgin)
+📧 [Contact Me](https://linktr.ee/sevilaymgirgin)
+🌐 [Portfolio](sevilaymuni.github.io/Girgin)
 
 
