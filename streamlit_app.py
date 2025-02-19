@@ -85,7 +85,6 @@ def create_interactive_visualizations(filtered_customer_df):
         st.write(f"Selected Customer ID: {click_data['points'][0]['customdata'][0]}")
         st.write("Insights: This customer is in the selected segment. Consider personalized offers to increase engagement.")
 
-
 # Customer Insights Tab
 if tab == "Customer Analysis":
     st.title("👥 Customer Analysis")
@@ -139,13 +138,6 @@ elif tab == "Product Analysis":
     st.subheader("🌐 Customer Segments and Product Connections (Network Graph)")
     segment_product_data = filtered_df.merge(filtered_customer_df, on='customer_id')
     segment_product_data = segment_product_data.groupby(['segment', 'product_category']).size().reset_index(name='count')
-    
-    # Limit the number of nodes
-    top_segments = segment_product_data['segment'].value_counts().index
-    top_products = segment_product_data['product_category'].value_counts().nlargest(10).index
-    segment_product_data = segment_product_data[
-        segment_product_data['segment'].isin(top_segments) &
-        segment_product_data['product_category'].isin(top_products)]
     
     fig_segment_product = px.scatter(segment_product_data, x='segment', y='product_category', size='count', color='count',
                                         title="Customer Segments and Product Connections",
