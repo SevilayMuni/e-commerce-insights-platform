@@ -122,15 +122,16 @@ elif tab == "Product Analysis":
     col2.metric("Total Revenue $", formatted_revenue, help="Total revenue generated from the selected categories.")
     col3.metric("Top Category", filtered_df['product_category'].mode()[0], help="Most popular product category.")
 
-    # Heatmap: Customer Activity Over Time
-    heatmap_data = filtered_df.groupby([filtered_df['order_purchase_timestamp'].dt.date, 'product_category']).size().unstack()
-    fig3 = px.imshow(heatmap_data, labels=dict(x="Product Category", y="Date", color="Activity"), title="🌐 Customer Activity Heatmap")
-    st.plotly_chart(fig3)
-
     # Treemap: Revenue by Product Category
     treemap_data = filtered_df.groupby('product_category')['payment_value'].sum().reset_index()
     fig4 = px.treemap(treemap_data, path=['product_category'], values='payment_value', title="💰 Revenue by Product Category")
     st.plotly_chart(fig4)
+    
+    # Heatmap: Customer Activity Over Time
+    heatmap_data = filtered_df.groupby([filtered_df['order_purchase_timestamp'].dt.date, 'product_category']).size().unstack()
+    fig3 = px.imshow(heatmap_data, labels=dict(x="Product Category", y="Date", color="Activity"), title="🌐 Customer Activity Heatmap", 
+                     color_continuous_scale='Greens', hover_data={"Activity": True})
+    st.plotly_chart(fig3)
 
 if tab == "Geolocation Analysis":
     st.title("🌍 Geolocation Analysis")
@@ -171,6 +172,12 @@ if tab == "Geolocation Analysis":
                 thickness=20,  # Thickness of nodes
                 line=dict(color="black", width=0.5),  # Node border
                 label=list(unique_seller_cities) + list(unique_product_categories)  # Labels for nodes
+            ),
+            font=dict(
+                size=14,  # Font size
+                color="black",  # Font color
+                family="Arial",  # Font family
+                weight="bold")
             ),
             link=dict(
                 source=seller_product_flow['source'],  # Source nodes (seller cities)
