@@ -5,9 +5,6 @@ import plotly.graph_objects as go
 import requests
 import datetime
 
-# FRED API Key
-FRED_API_KEY = "fe01e8ff873c535a4652b9f1bc78b788"
-
 # Load Data
 @st.cache_data
 def load_data():
@@ -71,6 +68,56 @@ formatted_revenue = f"${total_revenue/1e6:.2f}M" if total_revenue > 1e6 else f"$
 avg_order_value = filtered_df['payment_value'].mean()
 churn_rate = (filtered_df[filtered_df['recency'] > churn_threshold].shape[0] / total_customers) * 100
 
+# Function to create interactive visualizations
+    def create_interactive_visualizations(filtered_df, filtered_customer_df):
+        # RFM Analysis with click events
+        st.subheader("📌 Customer Segmentation (RFM)")
+        fig1 = px.scatter(
+            filtered_customer_df, x="frequency", y="total_spending", color="segment",
+            title="Customer Segments Based on Frequency & Spending",
+            labels={"segment": "Segment", "frequency": "Total Orders", "total_spending": "Total Spending"},
+            size_max=13,
+            hover_data=["customer_id"])
+        st.plotly_chart(fig1, use_container_width=True)
+    
+        # Add click event to RFM scatter plot
+        click_data = st.session_state.get('click_data', None)
+        if click_data:
+            st.write(f"Selected Customer ID: {click_data['points'][0]['customdata'][0]}")
+            st.write("Insights: This customer is in the selected segment. Consider personalized offers to increase engagement.")
+    
+        # Sankey Diagram for Customer Journey
+        st.subheader("📊 Customer Journey (Sankey Diagram)")
+        sankey_data = filtered_df.groupby(['customer_unique_id', 'product_category']).size().reset_index(name='count')
+        fig_sankey = go.Figure(go.Sankey(
+            node=dict(
+                pad=15,
+                thickness=20,
+                line=dict(color="black", width=0.5),
+                label=list(sankey_data['customer_unique_id'].unique()) + list(sankey_data['product_category'].unique())
+            ),
+            link=dict(
+                source=sankey_data['customer_unique_id'].astype('category').cat.codes,
+                target=sankey_data['product_category'].astype('category').cat.codes + len(sankey_data['customer_unique_id'].unique()),
+                value=sankey_data['count']
+            )
+        ))
+        st.plotly_chart(fig_sankey, use_container_width=True)
+    
+        # Network Graph for Customer-Product Relationships
+        st.subheader("🌐 Customer-Product Relationships (Network Graph)")
+        network_data = filtered_df.groupby(['customer_unique_id', 'product_category']).size().reset_index(name='count')
+        fig_network = px.scatter(network_data, x='customer_unique_id', y='product_category', size='count', color='count',
+                                 title="Customer-Product Relationships")
+        st.plotly_chart(fig_network, use_container_width=True)
+
+# Insights and Recommendations
+def display_insights_and_recommendations():
+    st.subheader("💡 Insights and Recommendations")
+    st.info("**Insight:** Customers in the 'At Risk' segment have a high churn rate. **Recommendation:** Implement targeted retention campaigns.")
+    st.success("**Insight:** Electronics is the top-selling category. **Recommendation:** Increase stock levels and promotions for Electronics.")
+    st.warning("**Insight:** Customers with high recency are likely to churn. **Recommendation:** Offer discounts to re-engage these customers.")
+
 # Customer Insights Tab
 if tab == "Customer Insights":
     st.title("👥 Customer Insights")
@@ -82,15 +129,11 @@ if tab == "Customer Insights":
     col3.metric("Average Order Value", f"${avg_order_value:,.2f}", help="Average value of orders in the selected segment and date range.")
     col4.metric("Churn Rate", f"{churn_rate:.2f}%", help=f"Percentage of customers who haven't made a purchase in the last {churn_threshold} days.")
 
-    # RFM Analysis
-    st.subheader("📌 Customer Segmentation (RFM)")
-    fig1 = px.scatter(
-        filtered_customer_df, x="frequency", y="total_spending", color="segment",
-        title="Customer Segments Based on Frequency & Spending",
-        labels={"segment": "Segment", "frequency": "Total Orders", "total_spending": "Total Spending"},
-        size_max=13,
-        hover_data=["customer_id"])
-    st.plotly_chart(fig1)
+    # Interactive Visualizations
+    create_interactive_visualizations(filtered_df, filtered_customer_df)
+
+    # Insights and Recommendations
+    display_insights_and_recommendations()
     
     # CLV Graph
     if tab == "Customer Insights":
@@ -142,6 +185,9 @@ elif tab == "Product Analysis":
 
 # Economic Trends Tab
 # Fetch FRED Data
+# FRED API Key
+FRED_API_KEY = "fe01e8ff873c535a4652b9f1bc78b788"
+
 @st.cache_data
 def fetch_fred_data(series_id, start_date, end_date):
     url = f"https://api.stlouisfed.org/fred/series/observations"
