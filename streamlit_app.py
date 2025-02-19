@@ -172,6 +172,7 @@ if tab == "Geolocation Analysis":
             thickness=20,  # Thickness of nodes
             line=dict(color="black", width=0.5),  # Node border
             label=list(unique_seller_cities) + list(unique_product_categories),  # Labels for nodes
+            opacity=1.0
         ),
         link=dict(
             source=seller_product_flow['source'],  # Source nodes (seller cities)
@@ -184,7 +185,6 @@ if tab == "Geolocation Analysis":
         # Update layout for better visualization
         fig_sankey.update_layout(
             title_text="📍 Flow of Orders from Seller Cities to Product Categories",
-            font_size=13,
             font=dict(
                 size=14,  # Adjust font size
                 color="black",  # Change font color to black
