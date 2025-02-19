@@ -172,7 +172,6 @@ if tab == "Geolocation Analysis":
             thickness=20,  # Thickness of nodes
             line=dict(color="black", width=0.5),  # Node border
             label=list(unique_seller_cities) + list(unique_product_categories),  # Labels for nodes
-            color="white"
         ),
         link=dict(
             source=seller_product_flow['source'],  # Source nodes (seller cities)
