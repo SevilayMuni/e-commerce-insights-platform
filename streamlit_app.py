@@ -137,7 +137,7 @@ elif tab == "Product Analysis":
     # Network Graph for Customer Segments and Products
     st.subheader("🌐 Customer Segments and Product Connections (Network Graph)")
     filtered_df2 = filtered_df.drop(columns = ["customer_id"])
-    filtered_df2.rename(columns = ({"customer_unique_id": "customer_id"}, inplace =  True)
+    filtered_df2.rename(columns = ({"customer_unique_id": "customer_id"})
     segment_product_data = filtered_df2.merge(filtered_customer_df, on='customer_id')
     
     # Group by segment and product category, and count occurrences
