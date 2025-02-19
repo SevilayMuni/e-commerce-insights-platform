@@ -123,47 +123,14 @@ elif tab == "Product Analysis":
     col3.metric("Top Category", filtered_df['product_category'].mode()[0], help="Most popular product category.")
 
     # Heatmap: Customer Activity Over Time
-    st.subheader("🌐 Customer Activity Heatmap")
     heatmap_data = filtered_df.groupby([filtered_df['order_purchase_timestamp'].dt.date, 'product_category']).size().unstack()
-    fig3 = px.imshow(heatmap_data, labels=dict(x="Product Category", y="Date", color="Activity"), title="Customer Activity Heatmap")
+    fig3 = px.imshow(heatmap_data, labels=dict(x="Product Category", y="Date", color="Activity"), title="🌐 Customer Activity Heatmap")
     st.plotly_chart(fig3)
 
     # Treemap: Revenue by Product Category
-    st.subheader("💰 Revenue by Product Category")
     treemap_data = filtered_df.groupby('product_category')['payment_value'].sum().reset_index()
-    fig4 = px.treemap(treemap_data, path=['product_category'], values='payment_value', title="Revenue by Product Category")
+    fig4 = px.treemap(treemap_data, path=['product_category'], values='payment_value', title="💰 Revenue by Product Category")
     st.plotly_chart(fig4)
-
-    # Network Graph for Customer Segments and Products
-    st.subheader("🌐 Customer Segments and Product Connections (Network Graph)")
-    filtered_df2 = filtered_df.drop(columns = ["customer_id"])
-    filtered_df2.rename(columns = ({"customer_unique_id": "customer_id"}))
-    segment_product_data = filtered_df2.merge(filtered_customer_df, on='customer_id')
-    
-    # Group by segment and product category, and count occurrences
-    segment_product_data = segment_product_data.groupby(['segment', 'product_category']).size().reset_index(name='count')
-    
-    # Check if data is empty after grouping
-    if segment_product_data.empty:
-        st.warning("No data available for the selected segments and product categories.")
-    else:
-        # Ensure categorical data
-        segment_product_data['segment'] = segment_product_data['segment'].astype('category')
-        segment_product_data['product_category'] = segment_product_data['product_category'].astype('category')
-    
-        # Create the scatter plot
-        fig_segment_product = px.scatter(
-            segment_product_data,
-            x='segment',  # Customer segments on the x-axis
-            y='product_category',  # Product categories on the y-axis
-            size='count',  # Size of the points based on the count
-            color='count',  # Color of the points based on the count
-            title="Customer Segments and Product Connections",
-            labels={'segment': 'Customer Segment', 'product_category': 'Product Category', 'count': 'Number of Purchases'}
-        )
-        
-        # Display the plot
-        st.plotly_chart(fig_segment_product, use_container_width=True)
 
 if tab == "Geolocation Analysis":
     st.title("🌍 Geolocation Analysis")
@@ -314,7 +281,6 @@ if tab == "Economic Trends":
             resampled_df = merged_df.resample("Y").mean(numeric_only=True)
 
         # Plot Dual-Axis Line Chart
-        st.subheader(f"{selected_metric} vs Retail Sales Over Time")
         fig = go.Figure()
 
         # Add selected metric trace
@@ -335,7 +301,7 @@ if tab == "Economic Trends":
         ))
 
         # Update layout for dual-axis
-        fig.update_layout(
+        fig.update_layout(title = (f"{selected_metric} vs Retail Sales Over Time"),
             xaxis_title="Date",
             yaxis_title=selected_metric,
             yaxis2=dict(title="Retail Sales", overlaying="y", side="right"),
@@ -345,3 +311,5 @@ if tab == "Economic Trends":
 
     else:
         st.warning("No data available for the selected metrics and date range.")
+
+st.markdown(''':rainbow[End-to-end project is done by] :blue-background[Sevilay Munire Girgin]''')
