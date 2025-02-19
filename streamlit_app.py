@@ -136,21 +136,34 @@ elif tab == "Product Analysis":
 
     # Network Graph for Customer Segments and Products
     st.subheader("🌐 Customer Segments and Product Connections (Network Graph)")
-    segment_product_data = filtered_df.merge(filtered_customer_df, on='customer_id')
+    
+    # Merge data on the correct column (ensure 'customer_unique_id' is used)
+    segment_product_data = filtered_df.merge(filtered_customer_df, on='customer_unique_id')
+    
+    # Group by segment and product category, and count occurrences
     segment_product_data = segment_product_data.groupby(['segment', 'product_category']).size().reset_index(name='count')
     
-    fig_segment_product = px.scatter(
-        segment_product_data,
-        x='segment',  # Customer segments on the x-axis
-        y='product_category',  # Product categories on the y-axis
-        size='count',  # Size of the points based on the count
-        color='count',  # Color of the points based on the count
-        title="Customer Segments and Product Connections",
-        labels={'segment': 'Customer Segment', 'product_category': 'Product Category', 'count': 'Number of Purchases'}
-    )
+    # Check if data is empty after grouping
+    if segment_product_data.empty:
+        st.warning("No data available for the selected segments and product categories.")
+    else:
+        # Ensure categorical data
+        segment_product_data['segment'] = segment_product_data['segment'].astype('category')
+        segment_product_data['product_category'] = segment_product_data['product_category'].astype('category')
     
-    # Display the plot
-    st.plotly_chart(fig_segment_product, use_container_width=True)
+        # Create the scatter plot
+        fig_segment_product = px.scatter(
+            segment_product_data,
+            x='segment',  # Customer segments on the x-axis
+            y='product_category',  # Product categories on the y-axis
+            size='count',  # Size of the points based on the count
+            color='count',  # Color of the points based on the count
+            title="Customer Segments and Product Connections",
+            labels={'segment': 'Customer Segment', 'product_category': 'Product Category', 'count': 'Number of Purchases'}
+        )
+        
+        # Display the plot
+        st.plotly_chart(fig_segment_product, use_container_width=True)
 
 if tab == "Geolocation Analysis":
     st.title("🌍 Geolocation Analysis")
@@ -161,43 +174,65 @@ if tab == "Geolocation Analysis":
         fig_map = px.scatter_mapbox(geo_df, lat="geolocation_lat", lon="geolocation_lng", 
                                     size="payment_value", hover_name="customer_city",
                                     hover_data={"payment_value": True}, color_discrete_sequence= ["plum"], zoom=4,
-                                    title = "Customer & Revenue Distribution by City")
+                                    title = "🧭 Customer & Revenue Distribution by City")
         fig_map.update_layout(mapbox_style="open-street-map")
         st.plotly_chart(fig_map)
     
-    # Sankey Diagram for Flow of Orders Among Cities
-    st.subheader("🌍 Flow of Orders Among Cities (Sankey Diagram)")
-    city_flow_data = filtered_df.groupby(['customer_city', 'seller_city']).size().reset_index(name='count')
+    # Sankey Diagram for Flow of Orders from Seller Cities to Product Categories
+    # Group data by seller_city and product_category
+    seller_product_flow = filtered_df.groupby(['seller_city', 'product_category']).size().reset_index(name='count')
     
-    # Limit the number of nodes
-    top_customer_cities = city_flow_data['customer_city'].value_counts().nlargest(10).index
-    top_seller_cities = city_flow_data['seller_city'].value_counts().nlargest(10).index
-    city_flow_data = city_flow_data[
-        city_flow_data['customer_city'].isin(top_customer_cities) &
-        city_flow_data['seller_city'].isin(top_seller_cities)]
+    # Limit the number of nodes for better visualization
+    top_seller_cities = seller_product_flow['seller_city'].value_counts().nlargest(10).index  # Top 10 seller cities
+    top_product_categories = seller_product_flow['product_category'].value_counts().nlargest(10).index  # Top 10 product categories
     
-    # Normalize the source and target values
-    unique_customer_cities = city_flow_data['customer_city'].unique()
-    unique_seller_cities = city_flow_data['seller_city'].unique()
+    # Filter data to include only top seller cities and product categories
+    seller_product_flow = seller_product_flow[
+        seller_product_flow['seller_city'].isin(top_seller_cities) &
+        seller_product_flow['product_category'].isin(top_product_categories)
+    ]
     
-    customer_city_to_code = {city: idx for idx, city in enumerate(unique_customer_cities)}
-    seller_city_to_code = {city: idx + len(unique_customer_cities) for idx, city in enumerate(unique_seller_cities)}
+    # Check if data is empty after filtering
+    if seller_product_flow.empty:
+        st.warning("No data available for the selected seller cities and product categories.")
+    else:
+        # Normalize the source and target values for Sankey diagram
+        unique_seller_cities = seller_product_flow['seller_city'].unique()
+        unique_product_categories = seller_product_flow['product_category'].unique()
     
-    city_flow_data['source'] = city_flow_data['customer_city'].map(customer_city_to_code)
-    city_flow_data['target'] = city_flow_data['seller_city'].map(seller_city_to_code)
+        # Create mappings for source and target
+        seller_city_to_code = {city: idx for idx, city in enumerate(unique_seller_cities)}
+        product_category_to_code = {category: idx + len(unique_seller_cities) for idx, category in enumerate(unique_product_categories)}
     
-    fig_city_sankey = go.Figure(go.Sankey(
-        node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=0.5),
-            label=list(unique_customer_cities) + list(unique_seller_cities)
-        ),
-        link=dict(
-            source=city_flow_data['source'],
-            target=city_flow_data['target'],
-            value=city_flow_data['count'])))
-    st.plotly_chart(fig_city_sankey, use_container_width=True)
+        # Map source and target to codes
+        seller_product_flow['source'] = seller_product_flow['seller_city'].map(seller_city_to_code)
+        seller_product_flow['target'] = seller_product_flow['product_category'].map(product_category_to_code)
+    
+        # Create Sankey diagram
+        fig_sankey = go.Figure(go.Sankey(
+            node=dict(
+                pad=15,  # Space between nodes
+                thickness=20,  # Thickness of nodes
+                line=dict(color="black", width=0.5),  # Node border
+                label=list(unique_seller_cities) + list(unique_product_categories)  # Labels for nodes
+            ),
+            link=dict(
+                source=seller_product_flow['source'],  # Source nodes (seller cities)
+                target=seller_product_flow['target'],  # Target nodes (product categories)
+                value=seller_product_flow['count'],  # Flow value (number of orders)
+                color="rgba(0, 128, 255, 0.6)"  # Color of the links
+            )
+        ))
+    
+        # Update layout for better visualization
+        fig_sankey.update_layout(
+            title_text="📍 Flow of Orders from Seller Cities to Product Categories",
+            font_size=12,
+            height=600  # Adjust height as needed
+        )
+    
+        # Display the Sankey diagram
+        st.plotly_chart(fig_sankey, use_container_width=True)
 
 
 # Economic Trends Tab
