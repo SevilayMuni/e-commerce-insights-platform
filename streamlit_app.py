@@ -139,9 +139,17 @@ elif tab == "Product Analysis":
     segment_product_data = filtered_df.merge(filtered_customer_df, on='customer_id')
     segment_product_data = segment_product_data.groupby(['segment', 'product_category']).size().reset_index(name='count')
     
-    fig_segment_product = px.scatter(segment_product_data, x='segment', y='product_category', size='count', color='count',
-                                        title="Customer Segments and Product Connections",
-                                        labels={'segment_code': 'Customer Segment', 'product_code': 'Product Category'})
+    fig_segment_product = px.scatter(
+        segment_product_data,
+        x='segment',  # Customer segments on the x-axis
+        y='product_category',  # Product categories on the y-axis
+        size='count',  # Size of the points based on the count
+        color='count',  # Color of the points based on the count
+        title="Customer Segments and Product Connections",
+        labels={'segment': 'Customer Segment', 'product_category': 'Product Category', 'count': 'Number of Purchases'}
+    )
+    
+    # Display the plot
     st.plotly_chart(fig_segment_product, use_container_width=True)
 
 if tab == "Geolocation Analysis":
