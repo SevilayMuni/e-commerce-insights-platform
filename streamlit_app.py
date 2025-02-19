@@ -141,7 +141,7 @@ elif tab == "Product Analysis":
     segment_product_data = segment_product_data.groupby(['segment', 'product_category']).size().reset_index(name='count')
     
     # Limit the number of nodes
-    top_segments = segment_product_data['segment'].value_counts().nlargest(5).index
+    top_segments = segment_product_data['segment'].value_counts().index
     top_products = segment_product_data['product_category'].value_counts().nlargest(10).index
     segment_product_data = segment_product_data[
         segment_product_data['segment'].isin(top_segments) &
