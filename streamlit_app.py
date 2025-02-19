@@ -69,7 +69,7 @@ avg_order_value = filtered_df['payment_value'].mean()
 churn_rate = (filtered_df[filtered_df['recency'] > churn_threshold].shape[0] / total_customers) * 100
 
 # Function to create interactive visualizations
-    def create_interactive_visualizations(filtered_df, filtered_customer_df):
+def create_interactive_visualizations(filtered_df, filtered_customer_df):
         # RFM Analysis with click events
         st.subheader("📌 Customer Segmentation (RFM)")
         fig1 = px.scatter(
