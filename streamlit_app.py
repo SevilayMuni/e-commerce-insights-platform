@@ -137,7 +137,7 @@ elif tab == "Product Analysis":
 
     # Network Graph for Customer Segments and Products
     st.subheader("🌐 Customer Segments and Product Connections (Network Graph)")
-    segment_product_data = filtered_df.merge(filtered_customer_df, on='customer_unique_id')
+    segment_product_data = filtered_df.merge(filtered_customer_df, on='customer_id')
     segment_product_data = segment_product_data.groupby(['segment', 'product_category']).size().reset_index(name='count')
     
     # Limit the number of nodes
