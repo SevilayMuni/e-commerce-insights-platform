@@ -1,5 +1,14 @@
 # E-Commerce Customer Segmentation and Marketing Dashboard
-## Overview
+<div align="center">
+<img src="https://img.shields.io/badge/Pandas-2C2D72?style=for-the-badge&logo=pandas&logoColor=white" >
+<img src="https://img.shields.io/badge/Plotly-239120?style=for-the-badge&logo=plotly&logoColor=white" >
+<img src="https://img.shields.io/badge/scikit_learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" >
+<img src="https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue" >
+<img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white" >
+<img src="https://img.shields.io/badge/Colab-F9AB00?style=for-the-badge&logo=googlecolab&color=525252" >
+</div>
+
+##
 This project provides an end-to-end data analytics pipeline for customer segmentation, personalized marketing insights, and a real-time economic trends dashboard.      Built using Python, machine learning, and Streamlit, it enables businesses to understand customer behavior, segment customers based on purchasing patterns, and design personalized marketing campaigns. 
 The analysis includes RFM (Recency, Frequency, Monetary) and K-Means segmentation, customer lifetime value (CLV) calculation, and other insights to drive strategic marketing decisions.
 
