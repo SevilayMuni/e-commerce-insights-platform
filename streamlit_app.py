@@ -234,20 +234,20 @@ def fetch_fred_data(series_id, start_date, end_date):
         return pd.DataFrame()
 
 if tab == "Economic Trends":
-    st.title("📈 Economic Trends - Brazil")
+    st.title("📈 Economic Trends")
     
     # Key Metrics in Cards for Economic Trends
     st.subheader("Key Economic Metrics")
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Inflation (CPI)", "5.2%", help="Latest Consumer Price Index (CPI) data for Brazil.")
-    col2.metric("Interest Rates", "13.75%", help="Brazil Central Bank Interest Rate.")
-    col3.metric("Unemployment Rate", "9.1%", help="Latest unemployment rate for Brazil.")
-    col4.metric("Retail Sales Growth", "2.3%", help="Monthly retail sales growth for Brazil.")
+    col1.metric("Inflation (CPI)", "2.5%", help="Latest Consumer Price Index (CPI) data.")
+    col2.metric("Interest Rates", "4.25%", help="Federal Funds Rate.")
+    col3.metric("Unemployment Rate", "3.8%", help="Latest unemployment rate.")
+    col4.metric("Retail Sales Growth", "1.2%", help="Monthly retail sales growth.")
 
     # Metric Selectbox
     st.subheader("Select Parameters for Plot")
-    metric_options = ["Inflation (CPI)", "Interest Rates", "Unemployment Rate"]
-    selected_metric = st.selectbox("Choose Economic Metric", metric_options, index=0)  # Default to Inflation
+    metric_options = ["Inflation (CPI)", "Interest Rates (Federal Funds Rate)", "Unemployment Rate"]
+    selected_metric = st.selectbox("Choose Economic Metric", metric_options, index=0)  # Default to Retail Sales
 
     # Date Range Selection
     start_date = st.date_input("Plot Start Date", datetime.date(2020, 1, 1))
@@ -258,11 +258,10 @@ if tab == "Economic Trends":
 
     # Fetch Data for Selected Metric and Retail Sales
     fred_series = {
-        "Inflation (CPI)": "BRACPIALLMINMEI",  # Brazil Inflation Rate (CPI)
-        "Interest Rates": "BRACALLM156N",       # Brazil Central Bank Interest Rate
-        "Unemployment Rate": "LMUNRRTTBRM156S", # Brazil Unemployment Rate
-        "Retail Sales": "BRARETAILQDSMEI"      # Brazil Retail Sales Growth
-    }
+        "Inflation (CPI)": "CPIAUCSL",
+        "Interest Rates (Federal Funds Rate)": "FEDFUNDS",
+        "Unemployment Rate": "UNRATE",
+        "Retail Sales": "RSXFS"}
 
     # Fetch data for the selected metric
     selected_series_id = fred_series[selected_metric]
@@ -307,13 +306,11 @@ if tab == "Economic Trends":
         ))
 
         # Update layout for dual-axis
-        fig.update_layout(
-            title=f"{selected_metric} vs Retail Sales Over Time (Brazil)",
+        fig.update_layout(title = (f"{selected_metric} vs Retail Sales Over Time"),
             xaxis_title="Date",
             yaxis_title=selected_metric,
             yaxis2=dict(title="Retail Sales", overlaying="y", side="right"),
-            legend=dict(x=0.02, y=0.98)
-        )
+            legend=dict(x=0.02, y=0.98))
 
         st.plotly_chart(fig)
 
