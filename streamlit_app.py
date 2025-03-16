@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import requests
 import datetime
 
+st.set_page_config(page_title ="E-Commerce SegmenTrack Web App",  page_icon = "🛍", layout = "wide")
+
 # Load Data
 @st.cache_data
 def load_data():
@@ -208,6 +210,7 @@ if tab == "Geolocation Analysis":
 
 # Economic Trends Tab
 # Fetch FRED Data
+FRED_API_KEY = 'fe01e8ff873c535a4652b9f1bc78b788'
 @st.cache_data
 def fetch_fred_data(series_id, start_date, end_date):
     url = f"https://api.stlouisfed.org/fred/series/observations"
