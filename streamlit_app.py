@@ -211,7 +211,8 @@ if tab == "Geolocation Analysis":
 
 # Economic Trends Tab
 # Fetch FRED Data
-FRED_API_KEY = 'fe01e8ff873c535a4652b9f1bc78b788'
+FRED_API_KEY = st.secrets[FRED_API_KEY]
+
 @st.cache_data
 def fetch_fred_data(series_id, start_date, end_date):
     url = f"https://api.stlouisfed.org/fred/series/observations"
