@@ -211,7 +211,7 @@ if tab == "Geolocation Analysis":
 
 # Economic Trends Tab
 # Fetch FRED Data
-FRED_API_KEY = st.secrets[FRED_API_KEY]
+FRED_API_KEY = st.secrets["FRED_API_KEY"]
 
 @st.cache_data
 def fetch_fred_data(series_id, start_date, end_date):
